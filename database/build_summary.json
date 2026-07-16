@@ -1,0 +1,12 @@
+{
+  "transcript_folder": "../YT Transcripts",
+  "files_found": 127,
+  "episodes_processed": 127,
+  "new_or_modified": 0,
+  "review_required": 128,
+  "parsing_or_integrity_issues": 83,
+  "duplicate_episode_numbers": [
+    "EP-083"
+  ],
+  "semantic_enrichment": "Pending: no approved AI API or local model available"
+}

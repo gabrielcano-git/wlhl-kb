@@ -1,0 +1,583 @@
+[
+  {
+    "Episode": "EP-001",
+    "Transcript Filename": "EP-001 - My 100 pound weight loss journey - EP 001.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-001; embedded header says EP-016. Filename retained."
+  },
+  {
+    "Episode": "EP-002",
+    "Transcript Filename": "EP-002 - How to stop gaining the weight back - EP 002.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-002; embedded header says EP-017. Filename retained."
+  },
+  {
+    "Episode": "EP-003",
+    "Transcript Filename": "EP-003 - Alcohol & weight loss - EP 003.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-003; embedded header says EP-018. Filename retained."
+  },
+  {
+    "Episode": "EP-004",
+    "Transcript Filename": "EP-004 - How to attract a healthy partner - EP 004.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-004; embedded header says EP-019. Filename retained."
+  },
+  {
+    "Episode": "EP-005",
+    "Transcript Filename": "EP-005 - How I overcame emotional & binge eating - EP 005.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-005; embedded header says EP-020. Filename retained."
+  },
+  {
+    "Episode": "EP-006",
+    "Transcript Filename": "EP-006 - From low calorie to healthy... | EP 006.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-006; embedded header says EP-021. Filename retained."
+  },
+  {
+    "Episode": "EP-008",
+    "Transcript Filename": "EP-008 - Excuses stopping you from losing weight - EP 008.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-008; embedded header says EP-022. Filename retained."
+  },
+  {
+    "Episode": "EP-009",
+    "Transcript Filename": "EP-009 - The dark side of being fat + Q&A - EP 009.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-009; embedded header says EP-023. Filename retained."
+  },
+  {
+    "Episode": "EP-010",
+    "Transcript Filename": "EP-010 - How to have a healthy relationship with food - EP 010.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-010; embedded header says EP-024. Filename retained."
+  },
+  {
+    "Episode": "EP-011",
+    "Transcript Filename": "EP-011 - How to conquer the 'all or nothing' mindset - EP 011.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-011; embedded header says EP-025. Filename retained."
+  },
+  {
+    "Episode": "EP-012",
+    "Transcript Filename": "EP-012 - Every diet I ever tried before losing 110 pounds - EP 012.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-012; embedded header says EP-026. Filename retained."
+  },
+  {
+    "Episode": "EP-013",
+    "Transcript Filename": "EP-013 - Healthier friendships & achieving your weight loss goals - EP 013.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-013; embedded header says EP-027. Filename retained."
+  },
+  {
+    "Episode": "EP-014",
+    "Transcript Filename": "EP-014 - The importance of having a routine and losing weight - EP 014.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-014; embedded header says EP-028. Filename retained."
+  },
+  {
+    "Episode": "EP-015",
+    "Transcript Filename": "EP-015 - Food swaps for weight loss that don't suck - EP 015.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-015; embedded header says EP-029. Filename retained."
+  },
+  {
+    "Episode": "EP-016",
+    "Transcript Filename": "EP-016 - I will start my diet tomorrow- - EP 016.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-016; embedded header says EP-012. Filename retained."
+  },
+  {
+    "Episode": "EP-017",
+    "Transcript Filename": "EP-017 - How to eat intuitively and lose weight - EP 017.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-017; embedded header says EP-030. Filename retained."
+  },
+  {
+    "Episode": "EP-018",
+    "Transcript Filename": "EP-018 - The best diet for permanent weight loss - EP 018.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-018; embedded header says EP-031. Filename retained."
+  },
+  {
+    "Episode": "EP-019",
+    "Transcript Filename": "EP-019 - Answering Your Weight Loss Questions #1 - EP 019.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-019; embedded header says EP-032. Filename retained."
+  },
+  {
+    "Episode": "EP-020",
+    "Transcript Filename": "EP-020 - What I eat 5 years after losing 110 pounds - EP 020.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-020; embedded header says EP-033. Filename retained."
+  },
+  {
+    "Episode": "EP-021",
+    "Transcript Filename": "EP-021 - Weight loss as the ultimate teacher - EP 021.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-021; embedded header says EP-034. Filename retained."
+  },
+  {
+    "Episode": "EP-022",
+    "Transcript Filename": "EP-022 - How to lose weight before hitting rock bottom - EP 022.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-022; embedded header says EP-035. Filename retained."
+  },
+  {
+    "Episode": "EP-023",
+    "Transcript Filename": "EP-023 - Developing your inner voice for weight loss success - EP 023.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-023; embedded header says EP-036. Filename retained."
+  },
+  {
+    "Episode": "EP-024",
+    "Transcript Filename": "EP-024 - -Calories in, calories out- isn't the full story - EP 024.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-024; embedded header says EP-037. Filename retained."
+  },
+  {
+    "Episode": "EP-025",
+    "Transcript Filename": "EP-025 - Are you a slave to your diet- - EP 025.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-025; embedded header says EP-038. Filename retained."
+  },
+  {
+    "Episode": "EP-026",
+    "Transcript Filename": "EP-026 - Answering your weight loss questions #2 - EP 026.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-026; embedded header says EP-039. Filename retained."
+  },
+  {
+    "Episode": "EP-027",
+    "Transcript Filename": "EP-027 - The 5 phases of your weight loss journey - EP 027.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-027; embedded header says EP-014. Filename retained."
+  },
+  {
+    "Episode": "EP-028",
+    "Transcript Filename": "EP-028 - How to eat out, be social, and still lose weight - EP 028.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-028; embedded header says EP-040. Filename retained."
+  },
+  {
+    "Episode": "EP-029",
+    "Transcript Filename": "EP-029 - How I stayed motivated to lose 110 pounds - EP 029.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-029; embedded header says EP-041. Filename retained."
+  },
+  {
+    "Episode": "EP-030",
+    "Transcript Filename": "EP-030 - Setting up your environment for weight loss success - EP 030.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-030; embedded header says EP-042. Filename retained."
+  },
+  {
+    "Episode": "EP-031",
+    "Transcript Filename": "EP-031 - Always eating low calorie foods sucks - EP 031.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-031; embedded header says EP-043. Filename retained."
+  },
+  {
+    "Episode": "EP-032",
+    "Transcript Filename": "EP-032 - Losing on weekdays, gaining on weekends - EP 032.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-032; embedded header says EP-044. Filename retained."
+  },
+  {
+    "Episode": "EP-033",
+    "Transcript Filename": "EP-033 - Dating & relationships - Before & after losing 110 pounds - EP 033.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-033; embedded header says EP-045. Filename retained."
+  },
+  {
+    "Episode": "EP-034",
+    "Transcript Filename": "EP-034 - Cheat meals are BS - 5 years after losing 110 pounds - EP 034.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-034; embedded header says EP-046. Filename retained."
+  },
+  {
+    "Episode": "EP-035",
+    "Transcript Filename": "EP-035 - My ongoing struggle after weight loss - EP 035.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-035; embedded header says EP-047. Filename retained."
+  },
+  {
+    "Episode": "EP-036",
+    "Transcript Filename": "EP-036 - Answering your weight loss questions #3 - EP 036.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-036; embedded header says EP-048. Filename retained."
+  },
+  {
+    "Episode": "EP-037",
+    "Transcript Filename": "EP-037 - The best exercise routine for sustainable weight loss - EP 037.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-037; embedded header says EP-049. Filename retained."
+  },
+  {
+    "Episode": "EP-038",
+    "Transcript Filename": "EP-038 - Should you take ozempic- - EP 038.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-038; embedded header says EP-050. Filename retained."
+  },
+  {
+    "Episode": "EP-039",
+    "Transcript Filename": "EP-039 - Are You Making Your Kids Fat- - EP 039.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-039; embedded header says EP-052. Filename retained."
+  },
+  {
+    "Episode": "EP-040",
+    "Transcript Filename": "EP-040 - Traveling on your weight loss journey - EP 040.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-040; embedded header says EP-051. Filename retained."
+  },
+  {
+    "Episode": "EP-041",
+    "Transcript Filename": "EP-041 - My easy weight loss morning routine - EP 041.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-041; embedded header says EP-053. Filename retained."
+  },
+  {
+    "Episode": "EP-042",
+    "Transcript Filename": "EP-042 - How I cured depression & lost 110 pounds naturally - EP 042.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-042; embedded header says EP-054. Filename retained."
+  },
+  {
+    "Episode": "EP-043",
+    "Transcript Filename": "EP-043 - The diet to end all diets... - EP 043.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-043; embedded header says EP-055. Filename retained."
+  },
+  {
+    "Episode": "EP-044",
+    "Transcript Filename": "EP-044 - Everything I Wish I Knew Before Losing 110 Pounds Naturally - EP 044.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-044; embedded header says EP-056. Filename retained."
+  },
+  {
+    "Episode": "EP-045",
+    "Transcript Filename": "EP-045 - Why Willpower Fails- The secret to sustainable weight loss - EP 045.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-045; embedded header says EP-057. Filename retained."
+  },
+  {
+    "Episode": "EP-046",
+    "Transcript Filename": "EP-046 - How to cure your fat mind - EP 046.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-046; embedded header says EP-058. Filename retained."
+  },
+  {
+    "Episode": "EP-047",
+    "Transcript Filename": "EP-047 - -I want to lose weight as fast as possible...- - EP 047.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-047; embedded header says EP-059. Filename retained."
+  },
+  {
+    "Episode": "EP-048",
+    "Transcript Filename": "EP-048 - 3 steps to a healthy relationship with food - EP 048.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-048; embedded header says EP-060. Filename retained."
+  },
+  {
+    "Episode": "EP-049",
+    "Transcript Filename": "EP-049 - -I Will Be Fat Forever- - EP 049.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-049; embedded header says EP-061. Filename retained."
+  },
+  {
+    "Episode": "EP-050",
+    "Transcript Filename": "EP-050 - How to survive he holidays on your weight loss journey - EP 050.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-050; embedded header says EP-062. Filename retained."
+  },
+  {
+    "Episode": "EP-051",
+    "Transcript Filename": "EP-051 - The most underrated weight loss hack... - EP 051.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-051; embedded header says EP-063. Filename retained."
+  },
+  {
+    "Episode": "EP-052",
+    "Transcript Filename": "EP-052 - How I lost 110 pounds and kept it off for 6 years - EP 052.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-052; embedded header says EP-001. Filename retained."
+  },
+  {
+    "Episode": "EP-053",
+    "Transcript Filename": "EP-053 - The common sense approach to working out - EP 053.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-053; embedded header says EP-002. Filename retained."
+  },
+  {
+    "Episode": "EP-054",
+    "Transcript Filename": "EP-054 - Your last New Year's resolution ever - EP 054.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-054; embedded header says EP-003. Filename retained."
+  },
+  {
+    "Episode": "EP-055",
+    "Transcript Filename": "EP-055 - How did I get so fat in the first place- - EP 055.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-055; embedded header says EP-004. Filename retained."
+  },
+  {
+    "Episode": "EP-056",
+    "Transcript Filename": "EP-056 - 5 things skinny people need to know about fat people - EP 056.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-056; embedded header says EP-005. Filename retained."
+  },
+  {
+    "Episode": "EP-057",
+    "Transcript Filename": "EP-057 - Want to lose weight- Forgive your parents - EP 057.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-057; embedded header says EP-006. Filename retained."
+  },
+  {
+    "Episode": "EP-058",
+    "Transcript Filename": "EP-058 - The TRUTH about s-x and weight loss - EP 058.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-058; embedded header says EP-007. Filename retained."
+  },
+  {
+    "Episode": "EP-059",
+    "Transcript Filename": "EP-059 - Beating imposter syndrome on your weight loss journey - EP 059.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-059; embedded header says EP-008. Filename retained."
+  },
+  {
+    "Episode": "EP-060",
+    "Transcript Filename": "EP-060 - How to lose weight without counting calories - EP 060.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-060; embedded header says EP-009. Filename retained."
+  },
+  {
+    "Episode": "EP-061",
+    "Transcript Filename": "EP-061 - Weight loss isn't a competition - EP 061.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-061; embedded header says EP-010. Filename retained."
+  },
+  {
+    "Episode": "EP-062",
+    "Transcript Filename": "EP-062 - How to make peace with the scale - EP 062.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-062; embedded header says EP-011. Filename retained."
+  },
+  {
+    "Episode": "EP-063",
+    "Transcript Filename": "EP-063 - The dark side of intermittent fasting - EP 063.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-063; embedded header says EP-013. Filename retained."
+  },
+  {
+    "Episode": "EP-064",
+    "Transcript Filename": "EP-064 - If food is the best part of your day... - EP 064.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-064; embedded header says EP-015. Filename retained."
+  },
+  {
+    "Episode": "EP-065",
+    "Transcript Filename": "EP-065 - The 'diet coke' effect - EP 065.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-065; embedded header says EP-064. Filename retained."
+  },
+  {
+    "Episode": "EP-066",
+    "Transcript Filename": "EP-066 - Lose weight by living it first in your mind - EP 066.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-066; embedded header says EP-065. Filename retained."
+  },
+  {
+    "Episode": "EP-067",
+    "Transcript Filename": "EP-067 - Is it Common Sense Diet approved- - EP 067.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-067; embedded header says EP-066. Filename retained."
+  },
+  {
+    "Episode": "EP-068",
+    "Transcript Filename": "EP-068 - Face yourself instead of the fridge - EP 068.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-068; embedded header says EP-067. Filename retained."
+  },
+  {
+    "Episode": "EP-069",
+    "Transcript Filename": "EP-069 - These -non-scale victories- are destroying your progress - EP 069.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-069; embedded header says EP-068. Filename retained."
+  },
+  {
+    "Episode": "EP-070",
+    "Transcript Filename": "EP-070 - A world where food makes your life better... - EP 070.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-070; embedded header says EP-069. Filename retained."
+  },
+  {
+    "Episode": "EP-071",
+    "Transcript Filename": "EP-071 - Standing naked in front of 110 people - EP 071.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-071; embedded header says EP-070. Filename retained."
+  },
+  {
+    "Episode": "EP-073",
+    "Transcript Filename": "EP-073 - My mom's last -Day 1- ever - EP 073.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-073; embedded header says EP-071. Filename retained."
+  },
+  {
+    "Episode": "EP-074",
+    "Transcript Filename": "EP-074 - My mom has NO CRAVINGS (first time ever) - EP 074.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-074; embedded header says EP-073. Filename retained."
+  },
+  {
+    "Episode": "EP-075",
+    "Transcript Filename": "EP-075 - Fixing my mom's relationship with food - EP 075.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-075; embedded header says EP-074. Filename retained."
+  },
+  {
+    "Episode": "EP-076",
+    "Transcript Filename": "EP-076 - 32 lbs in 17 weeks without suffering... - #076.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-076; embedded header says EP-075. Filename retained."
+  },
+  {
+    "Episode": "EP-077",
+    "Transcript Filename": "EP-077 - Anxiety & obesity feed each other (my mom's journey) - #077.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-077; embedded header says EP-076. Filename retained."
+  },
+  {
+    "Episode": "EP-078",
+    "Transcript Filename": "EP-078 - My fat mind vs. my healthy mind - #078.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-078; embedded header says EP-077. Filename retained."
+  },
+  {
+    "Episode": "EP-079",
+    "Transcript Filename": "EP-079 - How I stopped eating my feelings... - #079.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-079; embedded header says EP-078. Filename retained."
+  },
+  {
+    "Episode": "EP-080",
+    "Transcript Filename": "EP-080 - How to keep the weight off with ease. - #080.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-080; embedded header says EP-079. Filename retained."
+  },
+  {
+    "Episode": "EP-081",
+    "Transcript Filename": "EP-081 - Why most weight loss advice is total BS.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-081; embedded header says EP-080. Filename retained."
+  },
+  {
+    "Episode": "EP-082",
+    "Transcript Filename": "EP-082 - Ex-fat guy answers the internet’s weight loss questions.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-082; embedded header says EP-081. Filename retained."
+  },
+  {
+    "Episode": "EP-083",
+    "Transcript Filename": "EP-083 - I coached my mom for 10 weeks.txt",
+    "Issue Type": "Header episode mismatch",
+    "Severity": "Review",
+    "Details": "Canonical filename says EP-083; embedded header says EP-082. Filename retained."
+  },
+  {
+    "Episode": "EP-083",
+    "Transcript Filename": "EP-083 - I coached my mom for 10 weeks.txt",
+    "Issue Type": "Duplicate episode number",
+    "Severity": "Critical",
+    "Details": "Also used by EP-083 - How I lost 110 pounds without cravings.txt. Both exact filenames were retained; this record uses technical ID EP-083-DUP2."
+  },
+  {
+    "Episode": "EP-007",
+    "Transcript Filename": "",
+    "Issue Type": "Missing episode number",
+    "Severity": "Review",
+    "Details": "No canonical transcript filename uses this episode number. EP-072 is intentionally excluded."
+  }
+]

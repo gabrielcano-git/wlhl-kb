@@ -1,0 +1,474 @@
+{
+  "source": "WLHL_episode_enrichment.csv",
+  "source_sha256": "1dd408d2a28b0519abe8e5d111de875b144a8ec5fd119ad9521906400b76822d",
+  "rows_read": 127,
+  "unique_rows": 127,
+  "imported": 127,
+  "duplicate_identical_rows_ignored": [],
+  "column_alignment_corrections": [
+    {
+      "episode": "1",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "2",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "3",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "4",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "5",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "6",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "8",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "9",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "10",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "11",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "12",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "13",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "14",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "15",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "16",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "17",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "18",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "19",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "20",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "22",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "23",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "24",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "25",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "26",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "27",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "28",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "29",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "30",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "31",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "32",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "33",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "34",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "35",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "36",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "37",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "38",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "39",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "40",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "41",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "42",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "43",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "44",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "45",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "46",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "47",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "48",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "49",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "50",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "51",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "52",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "53",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "54",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "55",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "56",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "57",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "58",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "59",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "60",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "61",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "62",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "63",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "64",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "65",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "66",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "67",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "68",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "69",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "70",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "71",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "73",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "74",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "75",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "76",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "77",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "78",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "79",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "80",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "81",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "82",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "83",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "83",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "84",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "85",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "86",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "87",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "88",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "89",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "91",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "92",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "93",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "94",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "95",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "96",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "97",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "98",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "99",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "100",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "101",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "102",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "103",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "104",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "105",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "106",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "107",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "108",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "109",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "110",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "111",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "112",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "113",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "114",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "115",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "116",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "117",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    },
+    {
+      "episode": "118",
+      "reason": "Realigned shifted Simple Tags, Emotional Themes, Target Audience, and Weight Loss Stage"
+    }
+  ],
+  "unmatched": [],
+  "ambiguous": [],
+  "title_validation_warnings": [],
+  "database_integrity": "ok"
+}

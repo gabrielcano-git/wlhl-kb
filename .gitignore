@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+
+# Local and editor files
+.DS_Store
+.env
+.env.*
+.streamlit/secrets.toml
+.vscode/
+.idea/
+
+# SQLite transient files (the source database itself is intentionally tracked)
+database.sqlite-shm
+database.sqlite-wal
+database.sqlite-journal
+
+# Generated backups and local logs
+database/backups/
+*.log

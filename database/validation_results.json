@@ -1,0 +1,60 @@
+[
+  {
+    "filename": "EP-001 - My 100 pound weight loss journey - EP 001.txt",
+    "filename_preserved": true,
+    "episode_number": "EP-001",
+    "title": "My 100 pound weight loss journey | EP 001",
+    "date": "2025-03-09",
+    "url": "https://youtube.com/watch?v=b1yIcSyvglY",
+    "transcript_characters": 31290,
+    "relative_path": "../YT Transcripts/EP-001 - My 100 pound weight loss journey - EP 001.txt",
+    "quotes": [],
+    "semantic_status": "Pending AI enrichment",
+    "issues": [
+      {
+        "Episode": "EP-001",
+        "Transcript Filename": "EP-001 - My 100 pound weight loss journey - EP 001.txt",
+        "Issue Type": "Header episode mismatch",
+        "Severity": "Review",
+        "Details": "Canonical filename says EP-001; embedded header says EP-016. Filename retained."
+      }
+    ],
+    "passed": true
+  },
+  {
+    "filename": "EP-065 - The 'diet coke' effect - EP 065.txt",
+    "filename_preserved": true,
+    "episode_number": "EP-065",
+    "title": "The 'diet coke' effect | EP 065",
+    "date": "2025-03-13",
+    "url": "https://youtube.com/watch?v=srtNSHspzdw",
+    "transcript_characters": 30013,
+    "relative_path": "../YT Transcripts/EP-065 - The 'diet coke' effect - EP 065.txt",
+    "quotes": [],
+    "semantic_status": "Pending AI enrichment",
+    "issues": [
+      {
+        "Episode": "EP-065",
+        "Transcript Filename": "EP-065 - The 'diet coke' effect - EP 065.txt",
+        "Issue Type": "Header episode mismatch",
+        "Severity": "Review",
+        "Details": "Canonical filename says EP-065; embedded header says EP-064. Filename retained."
+      }
+    ],
+    "passed": true
+  },
+  {
+    "filename": "EP-128 - Watch This or QUIT at Your Next Plateau.txt",
+    "filename_preserved": true,
+    "episode_number": "EP-128",
+    "title": "Watch This or QUIT at Your Next Plateau",
+    "date": "2026-07-16",
+    "url": "https://youtube.com/watch?v=z-OUyStul8w",
+    "transcript_characters": 52014,
+    "relative_path": "../YT Transcripts/EP-128 - Watch This or QUIT at Your Next Plateau.txt",
+    "quotes": [],
+    "semantic_status": "Pending AI enrichment",
+    "issues": [],
+    "passed": true
+  }
+]

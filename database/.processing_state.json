@@ -1,0 +1,514 @@
+{
+  "generated_at": "2026-07-15T13:34:28+00:00",
+  "transcript_folder": "../YT Transcripts",
+  "files": {
+    "EP-001 - My 100 pound weight loss journey - EP 001.txt": {
+      "sha256": "b092a04a682067cb9a6bc32c63853bca038d56b5837285ef562e63fb5834197b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-002 - How to stop gaining the weight back - EP 002.txt": {
+      "sha256": "03a3e0329d9c9a5973e71f48035541c9f0bf3990b8a094b1df6f6ac03180b6fe",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-003 - Alcohol & weight loss - EP 003.txt": {
+      "sha256": "1460e302f1505f17166b73413a7064599b3ef021f7b1d040d153220230016e17",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-004 - How to attract a healthy partner - EP 004.txt": {
+      "sha256": "8d09661c7cfc618b5ab4ec102287cb6d4fc3e543952124e4b1cbf4e53f49b143",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-005 - How I overcame emotional & binge eating - EP 005.txt": {
+      "sha256": "736f87d569bdb4b48d70aff2d5bc0f4f172b7181e3f9a551db7c981993753bc1",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-006 - From low calorie to healthy... | EP 006.txt": {
+      "sha256": "e0aa2329bd41427894ba92b6e173d9b3f4c5c484f3a4835337009e138d23bee7",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-008 - Excuses stopping you from losing weight - EP 008.txt": {
+      "sha256": "dcbfcb547e4fb7b30477d3e564888258180b683709de309e7eaede4c368d4694",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-009 - The dark side of being fat + Q&A - EP 009.txt": {
+      "sha256": "b9b5a7802a0c64d3e1b5fdb538eab04770b80fd1ecc0c869e7b6467d0249b22b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-010 - How to have a healthy relationship with food - EP 010.txt": {
+      "sha256": "ebc923fdbb65acbc4557245360238551e3e9afaa8d9ac04be7559c0679f8802e",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-011 - How to conquer the 'all or nothing' mindset - EP 011.txt": {
+      "sha256": "e00122f9a0144d090d259111757a3e8534ffed4e303cf7ab622cbc997a0db4a6",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-012 - Every diet I ever tried before losing 110 pounds - EP 012.txt": {
+      "sha256": "418a8ee2e93be3233be82a82eadf9b0d4aabecceadb82919448ff54a87fb102e",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-013 - Healthier friendships & achieving your weight loss goals - EP 013.txt": {
+      "sha256": "23605945b74de8f05c18a14690b339ad1b24e0cc2401b99ea6cd066f9ac0ca49",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-014 - The importance of having a routine and losing weight - EP 014.txt": {
+      "sha256": "9abc55acc4f54e6b016a62051d48c27b667d4dd53af512dbf475e789aff7978b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-015 - Food swaps for weight loss that don't suck - EP 015.txt": {
+      "sha256": "7c704dee4149c55f068a2155fd9f83e5817d632f5f84b55fd89283dedb3e4dfa",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-016 - I will start my diet tomorrow- - EP 016.txt": {
+      "sha256": "ed9403e8980ac5876402a2997198a9fbff796b36e296b5d52d2c73439075be03",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-017 - How to eat intuitively and lose weight - EP 017.txt": {
+      "sha256": "6ea4e2e0efd0dcdc63e96bfb66e958fd9e9de2d918247644617e51133d5dcc10",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-018 - The best diet for permanent weight loss - EP 018.txt": {
+      "sha256": "44dee679504aaa5cbe783801a16cc4b5a76901fc50fd86d46378f6ef77b4e0f8",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-019 - Answering Your Weight Loss Questions #1 - EP 019.txt": {
+      "sha256": "1c557d3a7332850c0eae5ddd761389d3c1ba7cfab9558b8eec3b89f98ebc5ce9",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-020 - What I eat 5 years after losing 110 pounds - EP 020.txt": {
+      "sha256": "44c5e1041a4eadfa0e703aa5a7f9c538fe1fc4115d06957ba4f66e7e5efc7315",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-021 - Weight loss as the ultimate teacher - EP 021.txt": {
+      "sha256": "55715c654073f4e501608e2bbe022501aa10de513e25383b9eaab45c87bda1df",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-022 - How to lose weight before hitting rock bottom - EP 022.txt": {
+      "sha256": "a7253bf341389b0937c90ab7fda76ca4586349b2cd2d1a6eda6135a26f16c9c1",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-023 - Developing your inner voice for weight loss success - EP 023.txt": {
+      "sha256": "1fe9b7602658f85a2c2a59f9317261aec5c619a5951734b4b49fa70863b681d8",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-024 - -Calories in, calories out- isn't the full story - EP 024.txt": {
+      "sha256": "c6979b38a67f65b99f7610bd7fb17e69e841f4ae4aefec2f3edbf58fc7c99824",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-025 - Are you a slave to your diet- - EP 025.txt": {
+      "sha256": "36d7858e13b2d42a9053b5caf0102f2dc7e85d22b9e8c3a9932b5ecfb5a7c1bb",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-026 - Answering your weight loss questions #2 - EP 026.txt": {
+      "sha256": "d32b7514ba47e30d150372e66564fd8c5d271a3c3b2f84ca7107b7a31d47ae20",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-027 - The 5 phases of your weight loss journey - EP 027.txt": {
+      "sha256": "1dc90a229d7b79668c149ca8128e01db88271f22247c5738a1763ec6699e07d2",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-028 - How to eat out, be social, and still lose weight - EP 028.txt": {
+      "sha256": "37eab107952ec83d53f0370c6f3096776bdaee5d077072b8f3b249ab75a79d63",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-029 - How I stayed motivated to lose 110 pounds - EP 029.txt": {
+      "sha256": "76207a27edcafb6278939116e4bc14eea0b33c7e8978bbbf9cffecc650d27419",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-030 - Setting up your environment for weight loss success - EP 030.txt": {
+      "sha256": "be1f20f430b63697e4cb720b78298f37901f5a880584faf3cbba09cdd11edfc3",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-031 - Always eating low calorie foods sucks - EP 031.txt": {
+      "sha256": "3ddc3035c3c7d69501434493bcd286290c4e592b0e747a17037759542e6648ad",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-032 - Losing on weekdays, gaining on weekends - EP 032.txt": {
+      "sha256": "4007a06d9c01d04bbf8f62382cd7f32bdf9d7f5726507f3f3987177cf27d761f",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-033 - Dating & relationships - Before & after losing 110 pounds - EP 033.txt": {
+      "sha256": "429f0b5c32241e139e5fa20cfa389ed702743e9d710545ee889be75228d6289e",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-034 - Cheat meals are BS - 5 years after losing 110 pounds - EP 034.txt": {
+      "sha256": "14d5f9cfbb893c716d2dd1a43470c56923199e327f0c108e0e67a83f444b7203",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-035 - My ongoing struggle after weight loss - EP 035.txt": {
+      "sha256": "f0c8500a8dc4592fc1c595458fe12e42b3b77da99a5ce78ddd9e462b753dc46d",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-036 - Answering your weight loss questions #3 - EP 036.txt": {
+      "sha256": "bb31a2cb08f0ca041432c0d0ed63559bef1e857552c597403a9a22c9ef76d0e1",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-037 - The best exercise routine for sustainable weight loss - EP 037.txt": {
+      "sha256": "2992be68dea46d8144c29e438e2402f83baa5e8488ecb7b4edfdb53fd3c34d5e",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-038 - Should you take ozempic- - EP 038.txt": {
+      "sha256": "2a8090c032ea12baaaf4310f891612a46de353bf2458ff49338d287effd7131c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-039 - Are You Making Your Kids Fat- - EP 039.txt": {
+      "sha256": "126b45c1794f1b47e7d488c5eeb4e705206831aec6bc62a9cfe54f894147bc80",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-040 - Traveling on your weight loss journey - EP 040.txt": {
+      "sha256": "2f9bdb5474d63f0663fa90305069a4633029696cd89fa6f100d9f9f126fcc964",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-041 - My easy weight loss morning routine - EP 041.txt": {
+      "sha256": "f04809a673bfed147382ad6a1af08b02df14a645102be8b5b8634a0fcaf82626",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-042 - How I cured depression & lost 110 pounds naturally - EP 042.txt": {
+      "sha256": "0be64b93cfb3edb484b5ab941b50ff3ba12c30ce21d987c08e9ff49a64845bd2",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-043 - The diet to end all diets... - EP 043.txt": {
+      "sha256": "cacbccb5b42e6a62ed8fafc6db5fec2dbc32b4c3c5118d0d2c155a6af38fd641",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-044 - Everything I Wish I Knew Before Losing 110 Pounds Naturally - EP 044.txt": {
+      "sha256": "43c80f5ae3818f1e3013a3f32dd88818415a3b9738f14f4fa9a2abedab8ad2c4",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-045 - Why Willpower Fails- The secret to sustainable weight loss - EP 045.txt": {
+      "sha256": "b916f680d2d21a25aac59c8598f4e0482fa3c2575a2169c55afe3c846647c44b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-046 - How to cure your fat mind - EP 046.txt": {
+      "sha256": "df30eea3b9980bbb7a70aa67491df33a0f8f90273b83d9d706160158506ef1d6",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-047 - -I want to lose weight as fast as possible...- - EP 047.txt": {
+      "sha256": "0c14eb9ae53cd99c24fccf08ff8b0e7ba42850c080ea9d538eab021eea37b26b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-048 - 3 steps to a healthy relationship with food - EP 048.txt": {
+      "sha256": "3a384511bca92a3371d0cd14862ae37d9f81ad3744bffe045d244cd733c6330b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-049 - -I Will Be Fat Forever- - EP 049.txt": {
+      "sha256": "9b649363dfc8f6601cbb82649d1e991e23d0b2114f3093bed52cfdbf817092e7",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-050 - How to survive he holidays on your weight loss journey - EP 050.txt": {
+      "sha256": "48658050867ab952d6c382aa7fa5fa8418d73c703a087958e36e959d65687554",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-051 - The most underrated weight loss hack... - EP 051.txt": {
+      "sha256": "7aaf486f3a7b8a33c49f053ab040750166096b3bb8bb44d915d8ae273750bafe",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-052 - How I lost 110 pounds and kept it off for 6 years - EP 052.txt": {
+      "sha256": "f6abef3897eed7190b64c9d430a9866dc3471f69aafef21bd50a6a2b0e279d6a",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-053 - The common sense approach to working out - EP 053.txt": {
+      "sha256": "5eaa0f74b45a6c1097361680f74f60cdf906e2dad338aa1dddf96173f0514246",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-054 - Your last New Year's resolution ever - EP 054.txt": {
+      "sha256": "f9871c74c5d35217c669aed670dd0eb58f3c6afc5c6cbd45d69bac6a85ef5e45",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-055 - How did I get so fat in the first place- - EP 055.txt": {
+      "sha256": "a6e6639793f9aece81cfac55502eebef421ac5557ee98bf1c7c10eb5aa985994",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-056 - 5 things skinny people need to know about fat people - EP 056.txt": {
+      "sha256": "0be7d869e5b692e0e9700318894d2fa340818f1f53bc5baa5747feb866d776d4",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-057 - Want to lose weight- Forgive your parents - EP 057.txt": {
+      "sha256": "726ae280d8e05237a1844d3e727bab3527417aadc8132442090c0a9cc2ba1b05",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-058 - The TRUTH about s-x and weight loss - EP 058.txt": {
+      "sha256": "f37c9ca174f058ac4033e249f7bd4cc67a74aee694605d0a6d520d5d942f5c73",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-059 - Beating imposter syndrome on your weight loss journey - EP 059.txt": {
+      "sha256": "4b51d1bf1b46ed671f7fd36656f6c392c8a5e5fc89cd2d265ab32a3eda0950ee",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-060 - How to lose weight without counting calories - EP 060.txt": {
+      "sha256": "ebe5192752ec2d7681b157cd75727e2160df50c335483bde039cf90d3181e279",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-061 - Weight loss isn't a competition - EP 061.txt": {
+      "sha256": "3961c0e1e81e1638d7861e688d283162d0eb3526c2169cd8dc6b18b7323cf0ad",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-062 - How to make peace with the scale - EP 062.txt": {
+      "sha256": "7ed8f4273c65632bd826cde9b6941ca488829a85508b46b87f88399af5155401",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-063 - The dark side of intermittent fasting - EP 063.txt": {
+      "sha256": "8dbec9b9ef7f9402fe4fee5f168b21779b7114a8e3eb080f3697384a3c40ee44",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-064 - If food is the best part of your day... - EP 064.txt": {
+      "sha256": "9929651c85d611047d67afe26673305de0ea4a22d37fe01a840da5f979b1b2aa",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-065 - The 'diet coke' effect - EP 065.txt": {
+      "sha256": "543c4dd31a0fa5650a9ad51742482de4902f2df81553463a8e80f6141bf1d0ab",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-066 - Lose weight by living it first in your mind - EP 066.txt": {
+      "sha256": "69e69540b5ab2e776d78f13b1316ccf83f3d9c6855033dedee50373deb0a9302",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-067 - Is it Common Sense Diet approved- - EP 067.txt": {
+      "sha256": "7bd4350ec25444ebe07bf38665b16222dce88e58ec46ed33f54dd64b81f6a39c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-068 - Face yourself instead of the fridge - EP 068.txt": {
+      "sha256": "12364142c051ab91c0efd965f2c39bdcbcf04f63e17ab06f3812c17a53028cc5",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-069 - These -non-scale victories- are destroying your progress - EP 069.txt": {
+      "sha256": "b14dc4044283fa02898c2bf4290b153a09d94321418a7833d4af3a725e7b5e4d",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-070 - A world where food makes your life better... - EP 070.txt": {
+      "sha256": "06f9cfaa70c7067966abd70a50eebe7374a93947d546d8af2657ec7062bcdd36",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-071 - Standing naked in front of 110 people - EP 071.txt": {
+      "sha256": "3b6eac268953dc05f147641334522e3e46644c8b6196aaf34c57250598c87243",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-073 - My mom's last -Day 1- ever - EP 073.txt": {
+      "sha256": "73781e76c8aaf0cf0b33259683b8b362efd6558a6a40e660d149720079152490",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-074 - My mom has NO CRAVINGS (first time ever) - EP 074.txt": {
+      "sha256": "eb8cb734b63c52dbb02a57619a003e64e234d877fc67c10b460249de3733ac39",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-075 - Fixing my mom's relationship with food - EP 075.txt": {
+      "sha256": "95c78624d3bafe5f30eee17ab9a5815204193f588ee043520bb6623a0aef1b76",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-076 - 32 lbs in 17 weeks without suffering... - #076.txt": {
+      "sha256": "764552c193ec8c719b12e8e4fa41604d08f09555b27e01b954100d7b7083f9c8",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-077 - Anxiety & obesity feed each other (my mom's journey) - #077.txt": {
+      "sha256": "e62948e15866dd6dc44410518f24298562f049e65ef2f3afbba22050125c979c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-078 - My fat mind vs. my healthy mind - #078.txt": {
+      "sha256": "ae0baff305377294652cc7955349c9ee2f4610cbc573eedd704f4ccf565dc543",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-079 - How I stopped eating my feelings... - #079.txt": {
+      "sha256": "9258954d05c36b5067afe39fd464d41816a869e28939672087f63ec6835e752b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-080 - How to keep the weight off with ease. - #080.txt": {
+      "sha256": "5991e28a87be1d069c9d6e779d7b4537d2e590e1c92ea3568fd22c0c01a713fe",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-081 - Why most weight loss advice is total BS.txt": {
+      "sha256": "da013605e42db4b6827492e561db35ef718978e44b411c7dcf1e6ca56206970e",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-082 - Ex-fat guy answers the internet’s weight loss questions.txt": {
+      "sha256": "e5fa4c0404ef9a7f059789dd84d7c528acf86b55d8b9e139ba51185456ea448d",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-083 - How I lost 110 pounds without cravings.txt": {
+      "sha256": "55dd23ae4749e6d3c97add80526da62aca2213bdaff19850c8b397ffb205f7ad",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-083 - I coached my mom for 10 weeks.txt": {
+      "sha256": "c8a03a978c66517690cdfc42363b59d7962600ad940e3780359a64b9ea94875e",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-084 - Watch this if you hate your body.txt": {
+      "sha256": "0aa3b4fb5169eb966fbc1af4db7d959da8d9f6feb2ddc5fcc4d2bd7e5b91450c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-085 - Erase Self-Sabotage Forever- 10 Steps to Finally Lose Weight.txt": {
+      "sha256": "b53f76cff9a4d8eac2c75e92c7dc2bafab9a8452c39c8586d23d230c3eafa623",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-086 - How to end the war with your fat mind.txt": {
+      "sha256": "a7c66618022e27e6bd60bf6be5cdfd0495fc4b3dca93e0dc0923966f6cfab912",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-087 - How to feel SKINNY PRIVILEGE (without being skinny).txt": {
+      "sha256": "ff388615fcd429ab6903532303b14ccaa2050246cf3720d37d3f8c6dcaf24ed1",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-088 - These 20 excuses are keeping you obese.txt": {
+      "sha256": "87515d5ff4eca726d60ca65c5a9a0ccbc9f6e22c646f7a80a28e1de89cfe6708",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-089 - 21 Questions you need to ask yourself to lose weight.txt": {
+      "sha256": "5e704b5b172b879a37701e851852f7ffd25853d761d630fac390f38dfbdfe853",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-090 - This is sustainable weight loss (the Biggest Loser had it wrong).txt": {
+      "sha256": "398c34645bc92006713bf3c8bfcb38d3b39fcf401bfeeb70e056ae21f067d5a8",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-091 - Losing Momentum- Mom’s Week 18 Weight Loss Update.txt": {
+      "sha256": "b89ed46c50a2b39c8bdce6a3c352f03a9a99b965028a3430182347457974f199",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-092 - I Lost 110 Pounds - Here's How I Stayed Motivated.txt": {
+      "sha256": "4a0e3d642bc0abf8523668ff0e8a6930d25991b1623429abee3efcbdf5228123",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-093 - Forget dieting, do this instead.txt": {
+      "sha256": "de3a87829fad3b3c4648c3694ff0e2567ea78b8f92e92182d32f92d77ffbef56",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-094 - The art of eating just one slice.txt": {
+      "sha256": "78bd2696d9d0c2e8e61b6a15a1e2f960fc3d400d5eb96fcb8241a57eb491682b",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-095 - You will always gain the weight back, until.txt": {
+      "sha256": "508acd3e909b5efe1c53f526ac39c552b5c56099255a84e8a3e9af7496dea992",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-096 - Taking back control from food.txt": {
+      "sha256": "459d4ee740fffc744cb814d92edc0b565f67ac1d0c2c60146d54173b3b3a60e0",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-097 - Will she marry him-.txt": {
+      "sha256": "c8d42804857a49579dd43bec2f1f7fe87023414c408af2ae637d4c88ce6f0da5",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-098 - The Scale Just Won't Go Down!.txt": {
+      "sha256": "d1c4259471731a546c0042b6cff9a51e5bca04959d26a13300894c2ced494390",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-099 - How Do I Build a Sustainable Weight Loss Mindset-.txt": {
+      "sha256": "51dccc80e04c0c5fab5c38de3691f7a1e2603519a48d8c249dc25516e4a1c283",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-100 - How to End Cravings, Food Noise, & Emotional Eating Forever.txt": {
+      "sha256": "714d1fa3243a1bbbc822e5107172d8ff31d9f392a219f55e8ea51f3a42fb86ff",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-101 - Dear Food Addicts- Watch This.txt": {
+      "sha256": "44266040902c893010594916edc162114b861e8fb678ca928260eb79b4a25615",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-102 - The Best Weight Loss Advice Ever.txt": {
+      "sha256": "a007cb021987e202161ac8acf5d06b781edec02195689e7487294de5b38a2cdf",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-103 - How Do I Lose Weight After Menopause-.txt": {
+      "sha256": "ebc1c409e18b9675864356481a7c1c262a9e487f181988d169d8d369d4c8f62c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-104 - The Worst Weight Loss Advice Ever (This is Why You're Stuck).txt": {
+      "sha256": "31340af1f0e228fbd1333fd1a0108ee0d00874ccff46b24b8374d164658f13fb",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-105 - Why Can’t I Stay Motivated To Lose Weight-.txt": {
+      "sha256": "d86a754071c3295c40eab2ea4f26f07b57ed94c9f5f0e0b69e55ffc3078265aa",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-106 - I Wasted Thousands on Weight Loss Programs So You Don't Have To.txt": {
+      "sha256": "ca7acc135d1615256c2b8647829804d516b036d022a412a64f88ad866e9a17c4",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-107 - I know how to lose weight, I just don't know how to keep it off.txt": {
+      "sha256": "932f87d10946301ef9717a238b603e1a6bf2f74be853fa9797b89b774d392537",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-108 - How to finally keep the weight off.txt": {
+      "sha256": "315874093eb3db7e501f1191805fced12b942e859f8bed1c65ed290997822adc",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-109 - 110 Pounds Later- My Big Fat Secrets.txt": {
+      "sha256": "153e219ed34220b717e135d4c869fad5fd9213266bba7ee7e7224f117f1d0c06",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-110 - The World's FIRST Weight Loss Call-In Show - May 6, 2026.txt": {
+      "sha256": "cf189b80d9eafcf069aa88fae6b0e969f97a77e45b5b2b7b7375169283e35612",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-111 - 110 Pounds. 7 Years Later. Here's How I Stopped Quitting.txt": {
+      "sha256": "7ada1f788fcb8f44e49c5cfa5aa1b9e5fb85c9470b105077b72b0f7c0574b217",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-112 - This ONE Habit Makes Weight Loss Stick - May 13, 2026.txt": {
+      "sha256": "6075a05789cccfea8dcf431d184dce66bbf52ab7f85ebe85e7c5926e4633ebbe",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-113 - The Common Sense Diet Explained.txt": {
+      "sha256": "af7171dda2c5c9c702181f3172942e40a739ab2b2bd22a78c5c1c7745df4a9b8",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-114 - How I Lost 110 Pounds and Kept It Off for 7 Years.txt": {
+      "sha256": "86447123acb9c610982bf546a20c919755296becb1c9e190034afa5121ae9e7d",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-115 - How I Stopped Thinking Like a Fat Person - May 27, 2026.txt": {
+      "sha256": "063f4ab8965c2900fa3ea9329def2a472d99ac2cfc06f7e0307824be7a1cc829",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-116 - How I Stopped Emotional Eating and Lost 110 Pounds.txt": {
+      "sha256": "1d7cd43f782bfa6ce63cebc711139961f373ee34b0976b477179b8539e441956",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-117 - I Think I'll Always Be Fat - June 3, 2026.txt": {
+      "sha256": "c164f22f8c0af3f8503a275ff7690b16595b621b925881ed1ceb987f3387b91c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-118 - The Best Workout Routine for Permanent Weight Loss.txt": {
+      "sha256": "a43f169f8aa69d3eea0da6aeb9609a96183fa297379dc2119ec58d2098f591de",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-119 - Accept These 7 Harsh Weight Loss Truths or Stay Fat Forever.txt": {
+      "sha256": "d2f0f189ceb0a03a5f99ca71a4c65365f732960f78ab449fc7d3be69e4189d41",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-120 - ⁠How I Lost 110 Pounds Permanently (4 Steps).txt": {
+      "sha256": "6ccee60d4e76a0eaeb301151331a6df7e82452cb6f11a450c024d4a1eb908d69",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-121 - If you can’t eat just ONE cookie…watch this right now.txt": {
+      "sha256": "0f774191c9865c0d8791b587e6327609a2353f2d9acd37a4c098c16c0aa82fe3",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-122 - The secret to UNLIMITED motivation (from a former fat guy).txt": {
+      "sha256": "7aed71fea954559643efded607c25dadde92c7979cc80094d3e768146bd4ee07",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-123 - After the Diet- The Common Sense Diet EXPLAINED.txt": {
+      "sha256": "3dda1fa37f0acf7c3794e72957a9ea5b2e74a4e0729e5fa45f0bffd83d3840b8",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-124 - Do not get a weight loss shot before watching this.txt": {
+      "sha256": "1dfc81827da25c009f5536fbb6565994185da7ce7fde8a9adad14f1a980dd3c5",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-125 - How to get your SKINNY PRIVILEGE without being skinny.txt": {
+      "sha256": "5b70d675cd84c1d464386271fac140cd31be63366255c208f30e48fed0944464",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-126 - Being funny kept me fat…Here’s why.txt": {
+      "sha256": "934293e39aafcabb54df9461d87ca0b6e7df49110daae285b3228b62cdf3b783",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-127 - A Prayer for my Old Fat Self.txt": {
+      "sha256": "8e14d6f1bab530a6e0863252c818841d9751398f5f1abe286a80e06af0fdb81c",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    },
+    "EP-128 - Watch This or QUIT at Your Next Plateau.txt": {
+      "sha256": "d626eb243eb22a61a1bd51418fd70b888daaaaa6c73efb21ccb74523d40642e2",
+      "processed_at": "2026-07-15T13:34:28+00:00"
+    }
+  }
+}
