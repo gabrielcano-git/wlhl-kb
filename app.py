@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 import html
 import hashlib
+import hmac
 import csv
 import io
 import json
@@ -25,14 +26,66 @@ st.set_page_config(page_title="WLHL Knowledge Base", page_icon="☎️", layout=
 st.markdown("""<style>
 .block-container{max-width:1240px;padding-top:5rem;padding-bottom:3rem}
 .wlhl-title{font-size:2.15rem;font-weight:800;letter-spacing:-.04em;line-height:1.1}
-.muted,.result-count{color:#64748b}.tag{display:inline-block;background:#e6f7f5;color:#075e59;border-radius:999px;padding:3px 9px;margin:2px;font-size:.82rem}
-[data-testid="stMetric"]{background:#f8fafc;border:1px solid #e2e8f0;padding:15px;border-radius:14px;color:#000!important}
-[data-testid="stMetric"] *{color:#000!important}
+.muted,.result-count{color:#94a3b8}.tag{display:inline-block;background:#134e4a;color:#ccfbf1;border-radius:999px;padding:3px 9px;margin:2px;font-size:.82rem}
+[data-testid="stMetric"]{background:#172033;border:1px solid #334155;padding:15px;border-radius:14px;color:#f8fafc!important}
+[data-testid="stMetric"] *{color:#f8fafc!important}
 [data-testid="stTextInput"] input{font-size:1.08rem;padding:.78rem}.stButton button{border-radius:10px}
 [data-testid="stSidebar"] [data-testid="stImage"] button{display:none!important}
 mark{background:#fef08a;padding:0 2px}.section-space{height:.6rem}
 @media(max-width:760px){.block-container{padding:4.25rem 1rem 2rem}.wlhl-title{font-size:1.75rem}[data-testid="stMetric"]{padding:10px}}
 </style>""", unsafe_allow_html=True)
+
+
+def _auth_credentials():
+    """Read deployment credentials without ever placing them in source control."""
+    try:
+        auth = st.secrets.get("auth", {})
+        return str(auth.get("username", "")), str(auth.get("password", ""))
+    except Exception:
+        return "", ""
+
+
+def require_login():
+    """Stop rendering the knowledge base until the configured user signs in."""
+    if st.session_state.get("authenticated"):
+        return
+
+    expected_username, expected_password = _auth_credentials()
+    st.markdown('<div class="wlhl-title">WLHL Knowledge Base</div>', unsafe_allow_html=True)
+    st.caption("Sign in to access the private knowledge base.")
+
+    if not expected_username or not expected_password:
+        st.error("Login is not configured. Add [auth] username and password in Streamlit Secrets.")
+        st.stop()
+
+    with st.form("login-form"):
+        username = st.text_input("Username", autocomplete="username")
+        password = st.text_input("Password", type="password", autocomplete="current-password")
+        submitted = st.form_submit_button("Sign in", type="primary", use_container_width=True)
+
+    if submitted:
+        valid = hmac.compare_digest(username, expected_username) and hmac.compare_digest(password, expected_password)
+        if valid:
+            st.session_state.authenticated = True
+            st.rerun()
+        st.error("Invalid username or password.")
+    st.stop()
+
+
+def logout():
+    st.session_state.authenticated = False
+
+
+def is_localhost() -> bool:
+    """Only expose process controls to a browser connected to the local server."""
+    try:
+        host = st.context.headers.get("host", "").split(":", 1)[0].lower()
+        return host in {"localhost", "127.0.0.1", "::1"}
+    except Exception:
+        return False
+
+
+require_login()
 
 @st.cache_resource
 def db():
@@ -492,15 +545,17 @@ page = st.sidebar.radio(
     on_change=close_open_episode,
 )
 st.sidebar.caption("Everything stays on this computer.")
-st.sidebar.divider()
-st.sidebar.button("⏹ Stop App", on_click=request_app_stop, use_container_width=True)
-if st.session_state.get("confirm_app_stop"):
-    st.sidebar.warning("Stop the WLHL Knowledge Base now?")
-    stop_yes, stop_no = st.sidebar.columns(2)
-    stop_yes.button("Yes, stop", type="primary", on_click=stop_local_app, use_container_width=True)
-    stop_no.button("Cancel", on_click=cancel_app_stop, use_container_width=True)
-if st.session_state.get("confirm_app_stop") is False and st.session_state.get("_stop_message"):
-    st.sidebar.success("App stopped. You can close this browser tab.")
+st.sidebar.button("Sign out", on_click=logout, use_container_width=True)
+if is_localhost():
+    st.sidebar.divider()
+    st.sidebar.button("⏹ Stop App", on_click=request_app_stop, use_container_width=True)
+    if st.session_state.get("confirm_app_stop"):
+        st.sidebar.warning("Stop the WLHL Knowledge Base now?")
+        stop_yes, stop_no = st.sidebar.columns(2)
+        stop_yes.button("Yes, stop", type="primary", on_click=stop_local_app, use_container_width=True)
+        stop_no.button("Cancel", on_click=cancel_app_stop, use_container_width=True)
+    if st.session_state.get("confirm_app_stop") is False and st.session_state.get("_stop_message"):
+        st.sidebar.success("App stopped. You can close this browser tab.")
 st.markdown('<div class="wlhl-title">The Weight Loss Hotline</div><div class="muted">Search every episode, transcript, and coaching concept.</div>', unsafe_allow_html=True)
 st.write("")
 c = db()

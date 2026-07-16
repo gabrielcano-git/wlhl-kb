@@ -77,7 +77,7 @@ python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The app opens locally in a browser. It needs no account, server, cloud service, or internet connection after Streamlit is installed.
+Before the first local launch, copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and replace both placeholder values. This local secrets file is ignored by Git. The app opens locally in a browser. It needs no account, server, cloud service, or internet connection after Streamlit is installed.
 
 ## Deploy on Streamlit Community Cloud
 
@@ -85,8 +85,16 @@ This repository is ready to deploy with **Streamlit Community Cloud**. The commi
 
 1. Create a private GitHub repository and upload this entire folder, including `database.sqlite`, `assets/`, `.streamlit/config.toml`, `requirements.txt`, and `runtime.txt`.
 2. Go to [share.streamlit.io](https://share.streamlit.io), create an app, select the repository and branch, and set the entrypoint to `app.py`.
-3. In **Advanced settings**, select Python 3.12 (also declared in `runtime.txt`) and deploy.
-4. Restrict viewer access in the app settings before sharing it, since the database contains full episode transcripts.
+3. In **Advanced settings**, select Python 3.12 (also declared in `runtime.txt`). Then, in **Secrets**, add the following values with a unique username and a long password:
+
+   ```toml
+   [auth]
+   username = "your-username"
+   password = "a-long-unique-password"
+   ```
+
+   The file `.streamlit/secrets.toml.example` is a safe template. Do not commit a real `secrets.toml` file.
+4. Deploy. Every visitor must sign in before the knowledge base is rendered. You can also restrict viewer access in Streamlit's app settings for an additional access layer.
 
 The Community Cloud deployment is suitable for **searching, browsing, exporting, and generating/downloading prompts**. Its local filesystem is not durable: edits made through Add Episode, Quotes, presets, prompt history, or Writing Settings can be lost on a restart or redeploy. Keep editorial changes in the local application, then publish them by committing the updated `database.sqlite` to GitHub and redeploying.
 
