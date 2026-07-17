@@ -9,7 +9,11 @@ import sqlite3
 import unicodedata
 
 
-INDEX_VERSION = "wlhl-unified-search-v1"
+# The document and FTS tables are derived data.  Keep a separate schema version
+# so deployments can safely replace an older index stored in a persistent SQLite
+# database (as used by Streamlit Cloud).
+INDEX_VERSION = "wlhl-unified-search-v2"
+INDEX_SCHEMA_VERSION = "2"
 INDEX_COLUMNS = [
     "episode_number", "title", "publish_date", "main_category", "central_question",
     "summaries", "main_lesson", "central_struggle", "frameworks", "key_concepts",
@@ -80,6 +84,7 @@ def _unique(values) -> list[str]:
 def create_schema(conn: sqlite3.Connection) -> None:
     # Keep the portable document index available even on SQLite builds that do
     # not include the optional FTS5 extension (some hosted Python runtimes).
+    required_columns = {"episode_db_id", *INDEX_COLUMNS, "source_map_json"}
     conn.executescript("""
     CREATE TABLE IF NOT EXISTS unified_search_documents (
       episode_db_id INTEGER PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,
@@ -91,6 +96,32 @@ def create_schema(conn: sqlite3.Connection) -> None:
     );
     CREATE TABLE IF NOT EXISTS unified_search_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     """)
+
+    # CREATE TABLE IF NOT EXISTS does not migrate an existing table.  The
+    # search index is entirely rebuildable, so replace it when a deployment
+    # finds an older layout rather than failing on INSERT with (for example)
+    # "table ... has no column named source_map_json".
+    document_columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(unified_search_documents)")
+    }
+    schema_version = conn.execute(
+        "SELECT value FROM unified_search_meta WHERE key='schema_version'"
+    ).fetchone()
+    if document_columns != required_columns or not schema_version or schema_version[0] != INDEX_SCHEMA_VERSION:
+        conn.executescript("""
+        DROP TABLE IF EXISTS unified_episode_search;
+        DROP TABLE IF EXISTS unified_search_documents;
+        DROP TABLE IF EXISTS unified_search_meta;
+        CREATE TABLE unified_search_documents (
+          episode_db_id INTEGER PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,
+          episode_number TEXT, title TEXT, publish_date TEXT, main_category TEXT,
+          central_question TEXT, summaries TEXT, main_lesson TEXT, central_struggle TEXT,
+          frameworks TEXT, key_concepts TEXT, simple_tags TEXT, semantic_tags TEXT,
+          target_audience TEXT, actionable_takeaways TEXT, related_content TEXT,
+          transcript TEXT, source_map_json TEXT NOT NULL
+        );
+        CREATE TABLE unified_search_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        """)
     try:
         conn.execute("""
     CREATE VIRTUAL TABLE IF NOT EXISTS unified_episode_search USING fts5(
@@ -108,6 +139,10 @@ def create_schema(conn: sqlite3.Connection) -> None:
         # Search still works through unified_search_documents. FTS5 only adds
         # stemming and a small ranking bonus; it is not the source of truth.
         conn.rollback()
+    conn.execute(
+        "INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('schema_version',?)",
+        (INDEX_SCHEMA_VERSION,),
+    )
     conn.commit()
 
 
