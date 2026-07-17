@@ -78,6 +78,8 @@ def _unique(values) -> list[str]:
 
 
 def create_schema(conn: sqlite3.Connection) -> None:
+    # Keep the portable document index available even on SQLite builds that do
+    # not include the optional FTS5 extension (some hosted Python runtimes).
     conn.executescript("""
     CREATE TABLE IF NOT EXISTS unified_search_documents (
       episode_db_id INTEGER PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,
@@ -87,6 +89,10 @@ def create_schema(conn: sqlite3.Connection) -> None:
       target_audience TEXT, actionable_takeaways TEXT, related_content TEXT,
       transcript TEXT, source_map_json TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS unified_search_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    """)
+    try:
+        conn.execute("""
     CREATE VIRTUAL TABLE IF NOT EXISTS unified_episode_search USING fts5(
       episode_number, title, publish_date, main_category, central_question,
       summaries, main_lesson, central_struggle, frameworks, key_concepts,
@@ -94,9 +100,14 @@ def create_schema(conn: sqlite3.Connection) -> None:
       related_content, transcript,
       content='unified_search_documents', content_rowid='episode_db_id',
       tokenize='porter unicode61 remove_diacritics 2'
-    );
-    CREATE TABLE IF NOT EXISTS unified_search_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-    """)
+    )
+        """)
+    except sqlite3.OperationalError as error:
+        if "fts5" not in str(error).lower() and "module" not in str(error).lower():
+            raise
+        # Search still works through unified_search_documents. FTS5 only adds
+        # stemming and a small ranking bonus; it is not the source of truth.
+        conn.rollback()
     conn.commit()
 
 
@@ -190,7 +201,11 @@ def rebuild_index(conn: sqlite3.Connection) -> int:
             [document.get(column, "") for column in columns],
         )
         count+=1
-    conn.execute("INSERT INTO unified_episode_search(unified_episode_search) VALUES('rebuild')")
+    try:
+        conn.execute("INSERT INTO unified_episode_search(unified_episode_search) VALUES('rebuild')")
+    except sqlite3.OperationalError as error:
+        if "fts5" not in str(error).lower() and "module" not in str(error).lower() and "no such table" not in str(error).lower():
+            raise
     conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('fingerprint',?)", (fingerprint,))
     conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('version',?)", (INDEX_VERSION,))
     conn.commit()
