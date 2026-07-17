@@ -81,6 +81,21 @@ streamlit run app.py
 
 The app opens locally in a browser. It needs no account, server, cloud service, or internet connection after Streamlit is installed.
 
+### Streamlit login
+
+Add the following private values in the app's **Settings → Secrets** field on
+Streamlit Community Cloud (or locally in `.streamlit/secrets.toml`):
+
+```toml
+[auth]
+username = "your-login"
+password = "use-a-strong-password"
+```
+
+The application does not start the database connection until a visitor has
+entered these credentials. Do not commit the actual credentials to the
+repository.
+
 ### Turso migration
 
 The local SQLite file remains the working copy. To migrate its current schema and contents to the configured Turso database, keep `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in the untracked `.env` file, then run:
