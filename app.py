@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 import html
 import hashlib
+import hmac
 import csv
 import io
 import json
@@ -36,6 +37,40 @@ st.markdown("""<style>
 mark{background:#fef08a;padding:0 2px}.section-space{height:.6rem}
 @media(max-width:760px){.block-container{padding:4.25rem 1rem 2rem}.wlhl-title{font-size:1.75rem}[data-testid="stMetric"]{padding:10px}}
 </style>""", unsafe_allow_html=True)
+
+
+def require_authentication() -> None:
+    """Require the credentials configured in Streamlit's private secrets."""
+    try:
+        configured_username = str(st.secrets["auth"]["username"])
+        configured_password = str(st.secrets["auth"]["password"])
+    except (FileNotFoundError, KeyError):
+        st.error("Login is not configured. Add [auth] username and password to Streamlit Secrets.")
+        st.stop()
+
+    if st.session_state.get("authenticated"):
+        return
+
+    st.markdown('<div class="wlhl-title">The Weight Loss Hotline</div>', unsafe_allow_html=True)
+    st.caption("Sign in to access the Knowledge Base.")
+    with st.form("login_form"):
+        username = st.text_input("Username", autocomplete="username")
+        password = st.text_input("Password", type="password", autocomplete="current-password")
+        submitted = st.form_submit_button("Sign in", type="primary", use_container_width=True)
+
+    if submitted:
+        valid = (
+            hmac.compare_digest(username.encode(), configured_username.encode())
+            and hmac.compare_digest(password.encode(), configured_password.encode())
+        )
+        if valid:
+            st.session_state.authenticated = True
+            st.rerun()
+        st.error("Invalid username or password.")
+    st.stop()
+
+
+require_authentication()
 
 @st.cache_resource
 def db():
@@ -488,6 +523,9 @@ page = st.sidebar.radio(
 )
 st.sidebar.caption("Everything stays on this computer.")
 st.sidebar.divider()
+if st.sidebar.button("Log out", use_container_width=True):
+    st.session_state.pop("authenticated", None)
+    st.rerun()
 st.sidebar.button("⏹ Stop App", on_click=request_app_stop, use_container_width=True)
 if st.session_state.get("confirm_app_stop"):
     st.sidebar.warning("Stop the WLHL Knowledge Base now?")

@@ -8,3 +8,5 @@ __pycache__/
 .wlhl-tools/
 database/backups/
 *.log
+.env
+.streamlit/secrets.toml
