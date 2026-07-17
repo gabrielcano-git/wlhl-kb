@@ -3,7 +3,6 @@ from __future__ import annotations
 import sqlite3
 import html
 import hashlib
-import hmac
 import csv
 import io
 import json
@@ -18,6 +17,9 @@ from pathlib import Path
 import streamlit as st
 
 from prompt_workspace_ui import render_prompt_workspace, render_writing_settings
+from unified_search import ensure_index as ensure_unified_search_index
+from unified_search import refresh_episode as refresh_unified_search_episode
+from unified_search import search as search_unified_index
 
 ROOT = Path(__file__).resolve().parent
 DB = ROOT / "database.sqlite"
@@ -26,72 +28,28 @@ st.set_page_config(page_title="WLHL Knowledge Base", page_icon="☎️", layout=
 st.markdown("""<style>
 .block-container{max-width:1240px;padding-top:5rem;padding-bottom:3rem}
 .wlhl-title{font-size:2.15rem;font-weight:800;letter-spacing:-.04em;line-height:1.1}
-.muted,.result-count{color:#94a3b8}.tag{display:inline-block;background:#134e4a;color:#ccfbf1;border-radius:999px;padding:3px 9px;margin:2px;font-size:.82rem}
-[data-testid="stMetric"]{background:#172033;border:1px solid #334155;padding:15px;border-radius:14px;color:#f8fafc!important}
-[data-testid="stMetric"] *{color:#f8fafc!important}
+.muted,.result-count{color:#64748b}.tag{display:inline-block;background:#e6f7f5;color:#075e59;border-radius:999px;padding:3px 9px;margin:2px;font-size:.82rem}
+[data-testid="stMetric"]{background:#f8fafc;border:1px solid #e2e8f0;padding:15px;border-radius:14px;color:#000!important}
+[data-testid="stMetric"] *{color:#000!important}
 [data-testid="stTextInput"] input{font-size:1.08rem;padding:.78rem}.stButton button{border-radius:10px}
 [data-testid="stSidebar"] [data-testid="stImage"] button{display:none!important}
 mark{background:#fef08a;padding:0 2px}.section-space{height:.6rem}
 @media(max-width:760px){.block-container{padding:4.25rem 1rem 2rem}.wlhl-title{font-size:1.75rem}[data-testid="stMetric"]{padding:10px}}
 </style>""", unsafe_allow_html=True)
 
-
-def _auth_credentials():
-    """Read deployment credentials without ever placing them in source control."""
-    try:
-        auth = st.secrets.get("auth", {})
-        return str(auth.get("username", "")), str(auth.get("password", ""))
-    except Exception:
-        return "", ""
-
-
-def require_login():
-    """Stop rendering the knowledge base until the configured user signs in."""
-    if st.session_state.get("authenticated"):
-        return
-
-    expected_username, expected_password = _auth_credentials()
-    st.markdown('<div class="wlhl-title">WLHL Knowledge Base</div>', unsafe_allow_html=True)
-    st.caption("Sign in to access the private knowledge base.")
-
-    if not expected_username or not expected_password:
-        st.error("Login is not configured. Add [auth] username and password in Streamlit Secrets.")
-        st.stop()
-
-    with st.form("login-form"):
-        username = st.text_input("Username", autocomplete="username")
-        password = st.text_input("Password", type="password", autocomplete="current-password")
-        submitted = st.form_submit_button("Sign in", type="primary", use_container_width=True)
-
-    if submitted:
-        valid = hmac.compare_digest(username, expected_username) and hmac.compare_digest(password, expected_password)
-        if valid:
-            st.session_state.authenticated = True
-            st.rerun()
-        st.error("Invalid username or password.")
-    st.stop()
-
-
-def logout():
-    st.session_state.authenticated = False
-
-
-def is_localhost() -> bool:
-    """Only expose process controls to a browser connected to the local server."""
-    try:
-        host = st.context.headers.get("host", "").split(":", 1)[0].lower()
-        return host in {"localhost", "127.0.0.1", "::1"}
-    except Exception:
-        return False
-
-
-require_login()
-
 @st.cache_resource
 def db():
     connection = sqlite3.connect(DB, check_same_thread=False)
     connection.row_factory = sqlite3.Row
     return connection
+
+@st.cache_resource
+def initialize_unified_search():
+    """Build the derived cross-table index once per app process when required."""
+    ensure_unified_search_index(db())
+    return True
+
+initialize_unified_search()
 
 def scalar(sql, params=()):
     return db().execute(sql, params).fetchone()[0]
@@ -174,6 +132,7 @@ def refresh_episode_search(episode_db_id):
     c.execute("DELETE FROM episode_search WHERE episode_db_id=?",(episode_db_id,))
     c.execute("INSERT INTO episode_search VALUES(?,?,?,?,?,?,?,?,?,?,?)",(episode_db_id,row["episode_title"]," ".join([row["short_summary"] or "",row["detailed_summary"] or ""])," ".join(terms.get("key_takeaway",[])),row["nicks_main_advice"] or "",row["caller_problem"] or "",row["transcript"]," ".join(terms.get("keyword",[])+terms.get("search_term",[])+terms.get("hidden_concept",[])),quotes_text,topics,row["guest_caller_name"] or ""))
     c.commit()
+    refresh_unified_search_episode(c, episode_db_id)
 
 def refresh_enrichment_search(episode_db_id):
     c=db(); row=c.execute("SELECT e.id,e.episode_title,e.transcript,x.* FROM episodes e JOIN episode_enrichment x ON x.episode_id=e.id WHERE e.id=?",(episode_db_id,)).fetchone()
@@ -201,6 +160,53 @@ def save_manual_episode(values):
     for field in list_fields:
         for item in json.loads(payload[field]): c.execute("INSERT OR IGNORE INTO enrichment_values VALUES(?,?,?,?)",(eid,field,item,normalized(item)))
     c.commit();refresh_episode_search(eid);refresh_enrichment_search(eid);return eid
+
+def save_episode_edits(episode_db_id, values):
+    """Edit database metadata without changing canonical transcript source fields."""
+    c=db(); meta=enrichment(episode_db_id)
+    list_fields=["secondary_nick_frameworks","incidental_nick_concepts","simple_tags","emotional_themes","target_audience","weight_loss_stage","topic_tags","search_queries","hidden_concepts","myths_debunked","key_takeaways","caller_questions"]
+    parsed={field:split_manual(values.get(field,"")) for field in list_fields}
+    c.execute("""UPDATE episodes SET episode_title=?,publish_date=?,youtube_url=?,episode_type=?,
+        guest_caller_name=?,main_topic=?,main_category=?,nicks_main_advice=?,caller_problem=?,resolution=?,
+        weight_loss_stage=?,cta_recommendation=?,central_struggle=?,core_coaching_theme=?,success_story=? WHERE id=?""",(
+        values["episode_title"].strip(),str(values["publish_date"]),values["youtube_url"].strip(),values["episode_type"].strip(),
+        values["caller"].strip(),values["main_category"].strip(),values["main_category"].strip(),values["nicks_main_advice"].strip(),
+        values["caller_problem"].strip(),values["resolution"].strip(),"; ".join(parsed["weight_loss_stage"]),values["cta_recommendation"].strip(),
+        values["central_struggle"].strip(),values["core_coaching_theme"].strip(),int(values["success_story"]),episode_db_id,
+    ))
+    scalar_fields={
+        "source_episode_title":values["episode_title"].strip(),"episode_type":values["episode_type"].strip(),
+        "main_category":values["main_category"].strip(),"central_question":values["central_question"].strip(),
+        "central_struggle":values["central_struggle"].strip(),"core_coaching_theme":values["core_coaching_theme"].strip(),
+        "primary_nick_framework":values["primary_nick_framework"].strip(),
+    }
+    if meta:
+        assignments=",".join(f"{field}=?" for field in [*scalar_fields,*list_fields])
+        payload=[*scalar_fields.values(),*(json.dumps(parsed[field],ensure_ascii=False) for field in list_fields),episode_db_id]
+        c.execute(f"UPDATE episode_enrichment SET {assignments} WHERE episode_id=?",payload)
+    else:
+        episode=c.execute("SELECT episode_id FROM episodes WHERE id=?",(episode_db_id,)).fetchone()
+        columns=["episode_id","source_episode_number",*scalar_fields,*list_fields,"source_filename","source_hash","imported_at"]
+        payload=[episode_db_id,episode["episode_id"],*scalar_fields.values(),*(json.dumps(parsed[field],ensure_ascii=False) for field in list_fields),"Manual app edit","",datetime.now().isoformat(timespec="seconds")]
+        c.execute(f"INSERT INTO episode_enrichment({','.join(columns)}) VALUES({','.join('?' for _ in columns)})",payload)
+    c.execute("DELETE FROM enrichment_values WHERE episode_id=?",(episode_db_id,))
+    for field,items in parsed.items():
+        for item in items:
+            c.execute("INSERT OR IGNORE INTO enrichment_values(episode_id,kind,value,normalized_value) VALUES(?,?,?,?)",(episode_db_id,field,item,normalized(item)))
+    c.commit();refresh_episode_search(episode_db_id);refresh_enrichment_search(episode_db_id)
+
+def delete_episode(episode_db_id):
+    """Delete an app record and its related rows, never the source transcript file."""
+    c=db(); row=c.execute("SELECT episode_id,episode_title FROM episodes WHERE id=?",(episode_db_id,)).fetchone()
+    if not row: return "Episode"
+    label=f"{row['episode_id']} · {row['episode_title']}"
+    for table in ["quotes","email_ideas","short_hooks","processing_issues","enrichment_values","episode_terms","episode_topics","episode_enrichment"]:
+        c.execute(f"DELETE FROM {table} WHERE episode_id=?",(episode_db_id,))
+    c.execute("DELETE FROM episode_search WHERE episode_db_id=?",(episode_db_id,))
+    c.execute("DELETE FROM enrichment_search WHERE episode_db_id=?",(episode_db_id,))
+    c.execute("DELETE FROM episodes WHERE id=?",(episode_db_id,));c.commit()
+    refresh_unified_search_episode(c,episode_db_id)
+    return label
 
 def topic_values(episode_db_id):
     return [r[0] for r in db().execute("SELECT t.name FROM episode_topics et JOIN topics t ON t.id=et.topic_id WHERE et.episode_id=? ORDER BY et.is_primary DESC,t.name", (episode_db_id,))]
@@ -272,22 +278,76 @@ def render_edit_content(episode_db_id):
             for item in c.execute("SELECT * FROM email_ideas WHERE episode_id=? ORDER BY id",(episode_db_id,)).fetchall():
                 with st.form(f"edit-email-{item['id']}"):
                     idea=st.text_area("Email idea",item["idea"] or "",key=f"ei-{item['id']}");topic=st.text_input("Topic",item["topic"] or "",key=f"eit-{item['id']}");subject=st.text_input("Suggested subject",item["suggested_subject"] or "",key=f"eis-{item['id']}");cta=st.text_input("CTA",item["cta"] or "",key=f"eic-{item['id']}");u,d=st.columns(2)
-                    if u.form_submit_button("Save changes",use_container_width=True): c.execute("UPDATE email_ideas SET topic=?,idea=?,suggested_subject=?,cta=? WHERE id=?",(topic.strip(),idea.strip(),subject.strip(),cta.strip(),item["id"]));c.commit();st.rerun()
-                    if d.form_submit_button("Delete",use_container_width=True): c.execute("DELETE FROM email_ideas WHERE id=?",(item["id"],));c.commit();st.rerun()
+                    if u.form_submit_button("Save changes",use_container_width=True): c.execute("UPDATE email_ideas SET topic=?,idea=?,suggested_subject=?,cta=? WHERE id=?",(topic.strip(),idea.strip(),subject.strip(),cta.strip(),item["id"]));c.commit();refresh_unified_search_episode(c,episode_db_id);st.rerun()
+                    if d.form_submit_button("Delete",use_container_width=True): c.execute("DELETE FROM email_ideas WHERE id=?",(item["id"],));c.commit();refresh_unified_search_episode(c,episode_db_id);st.rerun()
             with st.form(f"add-email-{episode_db_id}"):
                 st.markdown("**Add an email idea**");idea=st.text_area("New email idea",key=f"nei-{episode_db_id}");topic=st.text_input("Topic",key=f"neit-{episode_db_id}");subject=st.text_input("Suggested subject",key=f"neis-{episode_db_id}");cta=st.text_input("CTA",key=f"neic-{episode_db_id}")
                 if st.form_submit_button("Add email idea",use_container_width=True):
-                    if idea.strip(): c.execute("INSERT INTO email_ideas(episode_id,topic,idea,suggested_subject,cta) VALUES(?,?,?,?,?)",(episode_db_id,topic.strip(),idea.strip(),subject.strip(),cta.strip()));c.commit();st.rerun()
+                    if idea.strip(): c.execute("INSERT INTO email_ideas(episode_id,topic,idea,suggested_subject,cta) VALUES(?,?,?,?,?)",(episode_db_id,topic.strip(),idea.strip(),subject.strip(),cta.strip()));c.commit();refresh_unified_search_episode(c,episode_db_id);st.rerun()
         with hook_tab:
             for item in c.execute("SELECT * FROM short_hooks WHERE episode_id=? ORDER BY id",(episode_db_id,)).fetchall():
                 with st.form(f"edit-hook-{item['id']}"):
                     hook=st.text_area("Hook",item["hook"] or "",key=f"h-{item['id']}");topic=st.text_input("Topic",item["topic"] or "",key=f"ht-{item['id']}");kind=st.selectbox("Type",["Exact Quote","Adapted"],index=0 if item["exact_or_adapted"]=="Exact Quote" else 1,key=f"hk-{item['id']}");u,d=st.columns(2)
-                    if u.form_submit_button("Save changes",use_container_width=True): c.execute("UPDATE short_hooks SET topic=?,hook=?,exact_or_adapted=? WHERE id=?",(topic.strip(),hook.strip(),kind,item["id"]));c.commit();st.rerun()
-                    if d.form_submit_button("Delete",use_container_width=True): c.execute("DELETE FROM short_hooks WHERE id=?",(item["id"],));c.commit();st.rerun()
+                    if u.form_submit_button("Save changes",use_container_width=True): c.execute("UPDATE short_hooks SET topic=?,hook=?,exact_or_adapted=? WHERE id=?",(topic.strip(),hook.strip(),kind,item["id"]));c.commit();refresh_unified_search_episode(c,episode_db_id);st.rerun()
+                    if d.form_submit_button("Delete",use_container_width=True): c.execute("DELETE FROM short_hooks WHERE id=?",(item["id"],));c.commit();refresh_unified_search_episode(c,episode_db_id);st.rerun()
             with st.form(f"add-hook-{episode_db_id}"):
                 st.markdown("**Add a short hook**");hook=st.text_area("New hook",key=f"nh-{episode_db_id}");topic=st.text_input("Topic",key=f"nht-{episode_db_id}");kind=st.selectbox("Type",["Exact Quote","Adapted"],key=f"nhk-{episode_db_id}")
                 if st.form_submit_button("Add short hook",use_container_width=True):
-                    if hook.strip(): c.execute("INSERT INTO short_hooks(episode_id,topic,hook,exact_or_adapted) VALUES(?,?,?,?)",(episode_db_id,topic.strip(),hook.strip(),kind));c.commit();st.rerun()
+                    if hook.strip(): c.execute("INSERT INTO short_hooks(episode_id,topic,hook,exact_or_adapted) VALUES(?,?,?,?)",(episode_db_id,topic.strip(),hook.strip(),kind));c.commit();refresh_unified_search_episode(c,episode_db_id);st.rerun()
+
+def render_episode_management(row, enriched):
+    list_text=lambda field:"; ".join(enriched.get(field,[]) or [])
+    try: current_date=date.fromisoformat(row["publish_date"])
+    except (TypeError,ValueError): current_date=date.today()
+    with st.expander("✏️ Edit Episode"):
+        st.caption("The episode number, transcript filename, transcript path, and full transcript remain protected.")
+        with st.form(f"edit-episode-{row['id']}"):
+            title=st.text_input("Episode title",row["episode_title"] or "")
+            a,b=st.columns(2);publish_date=a.date_input("Publish date",current_date);episode_type=b.text_input("Episode type",enriched.get("episode_type") or row["episode_type"] or "")
+            youtube_url=st.text_input("YouTube URL",row["youtube_url"] or "");caller=st.text_input("Guest / Caller name",row["guest_caller_name"] or "")
+            success_story=st.checkbox("Success story",bool(row["success_story"]))
+            st.markdown("**Episode analysis**")
+            main_category=st.text_input("Main category",enriched.get("main_category") or row["main_category"] or row["main_topic"] or "")
+            central_question=st.text_area("Central question",enriched.get("central_question","") or "",height=80)
+            central_struggle=st.text_area("Central struggle",enriched.get("central_struggle") or row["central_struggle"] or "",height=80)
+            core_theme=st.text_area("Core coaching theme / Main lesson",enriched.get("core_coaching_theme") or row["core_coaching_theme"] or "",height=90)
+            primary_framework=st.text_input("Primary Nick framework",enriched.get("primary_nick_framework","") or "")
+            secondary=st.text_area("Secondary Nick frameworks — separate with semicolons",list_text("secondary_nick_frameworks"),height=80)
+            incidental=st.text_area("Incidental Nick concepts — separate with semicolons",list_text("incidental_nick_concepts"),height=80)
+            simple_tags=st.text_area("Simple tags — separate with semicolons",list_text("simple_tags"),height=80)
+            topic_tags=st.text_area("Semantic / Topic tags — separate with semicolons",list_text("topic_tags"),height=80)
+            search_queries=st.text_area("Search queries — separate with semicolons",list_text("search_queries"),height=100)
+            hidden=st.text_area("Hidden concepts — separate with semicolons",list_text("hidden_concepts"),height=80)
+            emotional=st.text_area("Emotional themes — separate with semicolons",list_text("emotional_themes"),height=80)
+            audience=st.text_area("Target audience — separate with semicolons",list_text("target_audience"),height=80)
+            stages=st.text_area("Weight loss stage — separate with semicolons",list_text("weight_loss_stage"),height=80)
+            takeaways=st.text_area("Key takeaways — separate with semicolons",list_text("key_takeaways"),height=110)
+            myths=st.text_area("Myths debunked — separate with semicolons",list_text("myths_debunked"),height=80)
+            caller_questions=st.text_area("Caller questions — separate with semicolons",list_text("caller_questions"),height=80)
+            st.markdown("**Additional details**")
+            caller_problem=st.text_area("Caller problem",row["caller_problem"] or "",height=80)
+            nicks_advice=st.text_area("Nick's advice",row["nicks_main_advice"] or "",height=90)
+            resolution=st.text_area("Resolution",row["resolution"] or "",height=80)
+            cta=st.text_input("CTA recommendation",row["cta_recommendation"] or "")
+            if st.form_submit_button("Save Episode Changes",type="primary",use_container_width=True):
+                if not title.strip(): st.error("Episode title cannot be blank.")
+                else:
+                    save_episode_edits(row["id"],{"episode_title":title,"publish_date":publish_date,"episode_type":episode_type,"youtube_url":youtube_url,"caller":caller,"success_story":success_story,"main_category":main_category,"central_question":central_question,"central_struggle":central_struggle,"core_coaching_theme":core_theme,"primary_nick_framework":primary_framework,"secondary_nick_frameworks":secondary,"incidental_nick_concepts":incidental,"simple_tags":simple_tags,"topic_tags":topic_tags,"search_queries":search_queries,"hidden_concepts":hidden,"emotional_themes":emotional,"target_audience":audience,"weight_loss_stage":stages,"key_takeaways":takeaways,"myths_debunked":myths,"caller_questions":caller_questions,"caller_problem":caller_problem,"nicks_main_advice":nicks_advice,"resolution":resolution,"cta_recommendation":cta})
+                    st.session_state._episode_notice=f"{row['episode_id']} was updated successfully."
+                    st.rerun()
+    st.markdown("#### Delete episode")
+    st.caption("This removes the episode from this app database. It does not delete the original transcript file.")
+    confirm_key=f"confirm-delete-{row['id']}"
+    if not st.session_state.get(confirm_key):
+        if st.button("Delete Episode",key=f"delete-{row['id']}",use_container_width=True):
+            st.session_state[confirm_key]=True;st.rerun()
+    else:
+        st.warning(f"Delete {row['episode_id']} permanently from this app database?")
+        yes,no=st.columns(2)
+        if yes.button("Yes, delete episode",key=f"delete-yes-{row['id']}",type="primary",use_container_width=True):
+            label=delete_episode(row["id"]);st.session_state.pop(confirm_key,None);st.session_state.pop("episode_id",None);st.session_state._episode_notice=f"{label} was deleted from the app database.";st.rerun()
+        if no.button("Cancel",key=f"delete-no-{row['id']}",use_container_width=True):
+            st.session_state.pop(confirm_key,None);st.rerun()
 
 def episode_dialog():
     if "episode_id" not in st.session_state:
@@ -350,6 +410,7 @@ def episode_dialog():
             for i in ideas: st.write(f'**{i["suggested_subject"] or "Email idea"}**  \n{i["idea"]}  \nCTA: {i["cta"] or "—"}')
         with st.expander(f"Short hooks ({len(hooks)})"):
             for h in hooks: st.write(f'{h["hook"]} · {h["exact_or_adapted"] or "Unspecified"}')
+        render_episode_management(row,enriched)
         render_edit_content(row["id"])
         st.divider()
         st.subheader("Full transcript")
@@ -359,74 +420,15 @@ def episode_dialog():
             st.rerun()
     show()
 
-STOP_WORDS = {"a","about","after","am","an","and","are","do","does","eat","episode","episodes","find","for","how","i","in","is","it","ll","me","my","of","on","show","the","to","video","videos","what","where","why","with"}
-CONTEXT_WORDS = {"call","called","calling","go","going","nick","out","podcast","talk","talked","talking","weight","loss"}
-QUERY_SYNONYMS = {
-    "dinner": ["dining", "restaurant", "restaurants", "eat out", "eating out", "meal"],
-    "friend": ["friends", "friendship", "friendships", "social", "socializing"],
-    "friends": ["friend", "friendship", "friendships", "social", "socializing"],
-    "doctor": ["medical", "physician"],
-    "workout": ["exercise", "training", "gym"],
-    "workouts": ["exercise", "training", "gym"],
-    "hungry": ["hunger", "appetite"],
-    "sad": ["sadness", "depression", "emotional"],
-    "vacation": ["travel", "traveling", "holiday"],
-    "weekend": ["weekends", "saturday", "sunday"],
-}
-SEMANTIC_RULES = [
-    ({"grief eating","grief","bereavement"}, ["grief","sadness","emotional distress","emotional eating","coping with loss","bereavement"]),
-    ({"starting over","start over","restarting","monday"}, ["restarting every monday","all or nothing thinking","quitting","weight regain","last day 1"]),
-    ({"gain it back","gaining the weight back","keep the weight off","fear of regain"}, ["fear of regain","maintenance","sustainable weight loss","weight regain","keeping weight off"]),
-    ({"food controls me","food control","food controls"}, ["food noise","emotional eating","binge eating","cravings","relationship with food"]),
-    ({"lost motivation","motivation","momentum"}, ["motivation","complacency","consistency","momentum","plateau","reconnecting with your why"]),
-    ({"bariatric","weight loss surgery"}, ["bariatric surgery","gastric bypass","weight loss surgery","post bariatric maintenance"]),
-    ({"pizza","moderation"}, ["pizza","moderation","one slice","restaurant eating","food freedom"]),
-]
-
-def query_groups_are_nearby(text, groups, max_gap=700):
-    """Return True when every query concept appears in one reasonably small passage."""
-    if len(groups) < 2:
-        return False
-    events=[]
-    for group_index, group in enumerate(groups):
-        positions=[]
-        for term in group:
-            start=0
-            while len(positions)<30:
-                pos=text.find(term,start)
-                if pos<0: break
-                positions.append(pos); start=pos+max(1,len(term))
-        events.extend((pos,group_index) for pos in positions)
-    events.sort()
-    counts={}; left=0
-    for right,(position,group_index) in enumerate(events):
-        counts[group_index]=counts.get(group_index,0)+1
-        while len(counts)==len(groups):
-            if position-events[left][0] <= max_gap: return True
-            left_group=events[left][1]; counts[left_group]-=1
-            if counts[left_group]==0: del counts[left_group]
-            left+=1
-    return False
-
 def search_episodes(query, filters):
-    rows = db().execute("SELECT e.* FROM episodes e ORDER BY e.episode_number").fetchall()
-    q = normalized(query); tokens = [x for x in q.split() if x not in STOP_WORDS]
-    focus_tokens = [token for token in tokens if token not in CONTEXT_WORDS]
-    query_groups = []
-    literal_query_groups = []
-    for token in focus_tokens:
-        variants = [token]
-        if token.endswith("ies") and len(token)>4: variants.append(token[:-3]+"y")
-        elif token.endswith("s") and len(token)>3: variants.append(token[:-1])
-        literal_query_groups.append(list(dict.fromkeys(normalized(value) for value in variants if value)))
-        variants.extend(QUERY_SYNONYMS.get(token, []))
-        query_groups.append(list(dict.fromkeys(normalized(value) for value in variants if value)))
-    concepts = list(tokens)
-    for triggers, expansions in SEMANTIC_RULES:
-        if any(trigger in q for trigger in triggers): concepts.extend(normalized(x) for x in expansions)
-    concepts = list(dict.fromkeys(x for x in concepts if x))
-    results=[]
-    for source in rows:
+    connection=db(); results=[]
+    matches=search_unified_index(connection, query) if normalized(query) else [
+        {"episode_db_id": row[0], "score": 0, "reason": "", "snippet": ""}
+        for row in connection.execute("SELECT id FROM episodes ORDER BY episode_number")
+    ]
+    for match in matches:
+        source=connection.execute("SELECT * FROM episodes WHERE id=?",(match["episode_db_id"],)).fetchone()
+        if not source: continue
         row=dict(source); meta=enrichment(row["id"])
         effective_type=meta.get("episode_type") or row["episode_type"]
         stages=meta.get("weight_loss_stage") or ([row["weight_loss_stage"]] if row["weight_loss_stage"] else [])
@@ -441,71 +443,11 @@ def search_episodes(query, filters):
         if filters["success"] and not row["success_story"]: continue
         if filters["start"] and row["publish_date"]<str(filters["start"]): continue
         if filters["end"] and row["publish_date"]>str(filters["end"]): continue
-        if not q: row["snippet"]=""; results.append(row); continue
-        title=normalized(row["episode_title"]); simple=[normalized(x) for x in meta.get("simple_tags",[])]; topic_text=normalized(" ".join([category]+topics))
-        semantic_fields=[("Episode Type",effective_type or ""),("Guest or Caller",row.get("guest_caller_name") or ""),("Central Question",meta.get("central_question","")),("Central Struggle",meta.get("central_struggle","")),("Core Coaching Theme",meta.get("core_coaching_theme","")),("Search Queries","; ".join(meta.get("search_queries",[]))),("Hidden Concepts","; ".join(meta.get("hidden_concepts",[]))),("Key Takeaways","; ".join(meta.get("key_takeaways",[]))),("Caller's Questions","; ".join(meta.get("caller_questions",[]))),("Nick Frameworks","; ".join([meta.get("primary_nick_framework","")]+meta.get("secondary_nick_frameworks",[])+meta.get("incidental_nick_concepts",[]))),("Emotional Themes","; ".join(meta.get("emotional_themes",[]))),("Target Audience","; ".join(meta.get("target_audience",[])))]
-        semantic=normalized(" ".join(value for _,value in semantic_fields)); transcript=normalized(row["transcript"])
-        metadata_text = " ".join([title, " ".join(simple), topic_text, semantic])
-        searchable_text = " ".join([metadata_text, transcript])
-        if query_groups and not any(any(term in searchable_text for term in group) for group in query_groups):
-            continue
-        if not focus_tokens and "call" in tokens and "call" not in normalized(effective_type):
-            continue
-        score=0; reason=""; snippet=""
-        exact_transcript_match = len(q) > 2 and q in transcript
-        metadata_group_hits = sum(any(term in metadata_text for term in group) for group in query_groups)
-        transcript_group_hits = sum(any(term in transcript for term in group) for group in query_groups)
-        group_count = len(query_groups)
-        nearby_transcript_match = query_groups_are_nearby(transcript, literal_query_groups)
-        natural_language_match = bool(group_count and (
-            metadata_group_hits == group_count or nearby_transcript_match
-        ))
-        score += 130*metadata_group_hits + 25*transcript_group_hits
-        if group_count and metadata_group_hits == group_count: score += 350
-        elif nearby_transcript_match: score += 250
-        elif group_count and transcript_group_hits == group_count: score += 100
-        if q==title: score+=1200; reason="Exact episode title"
-        elif q in title: score+=700; reason="Episode title"
-        score+=80*sum(token in title for token in tokens)
-        exact_simple=[raw for raw in meta.get("simple_tags",[]) if normalized(raw)==q]
-        partial_simple=[]
-        for raw in meta.get("simple_tags",[]):
-            tag=normalized(raw)
-            if q in tag or (len(tokens)==1 and tokens[0] in tag) or (len(tokens)>1 and all(token in tag for token in tokens)):
-                partial_simple.append(raw)
-        if exact_simple: score+=550; reason=f"Exact Simple Tag: {exact_simple[0]}"
-        elif partial_simple: score+=320+40*min(len(partial_simple),3); reason=f"Simple Tag: {partial_simple[0]}"
-        if q==normalized(category) or any(q==normalized(x) for x in topics): score+=300; reason=reason or f"Central topic: {category}"
-        elif any(concept==normalized(category) for concept in concepts): score+=220; reason=reason or f"Main Category: {category}"
-        topic_hits=sum(concept in topic_text for concept in concepts); score+=70*min(topic_hits,6)
-        direct_semantic_hits=sum(token in semantic for token in tokens)
-        semantic_hits=sum(concept in semantic for concept in concepts)
-        score+=80*min(direct_semantic_hits,5)+25*min(max(0,semantic_hits-direct_semantic_hits),8)
-        if len(q)>3 and q in semantic: score+=450; reason=reason or "Exact phrase in episode analysis"
-        if semantic_hits and not reason:
-            for label,value in semantic_fields:
-                if any(concept in normalized(value) for concept in concepts): reason=f"{label} match"; snippet=html.escape(value[:360]); break
-        transcript_hits=sum(transcript.count(token) for token in tokens)
-        distinctive_transcript_hits=sum(1 for token in tokens if len(token)>=4 and token in transcript)
-        score+=min(transcript_hits,12)+35*distinctive_transcript_hits
-        if exact_transcript_match:
-            score += 500
-            reason = reason or "Exact phrase in transcript"
-            pos = transcript.find(q)
-            original = row["transcript"]
-            snippet = html.escape(original[max(0,pos-140):pos+360].replace("\n"," "))
-        elif transcript_hits and not reason:
-            reason="Transcript match"
-            positions=[transcript.find(token) for token in tokens if transcript.find(token)>=0]; pos=min(positions) if positions else 0
-            original=row["transcript"]; snippet=html.escape(original[max(0,pos-90):pos+260].replace("\n"," "))
-        if score>0:
-            row["match_score"]=score; row["match_explanation"]=reason or "Natural-language concept match"; row["snippet"]=snippet; row["exact_transcript_match"]=exact_transcript_match; row["natural_language_match"]=natural_language_match; results.append(row)
-    ranked = sorted(results,key=lambda x:(-x.get("match_score",0),x["episode_number"],x["episode_title"]))
-    if q and ranked and not (not focus_tokens and "call" in tokens):
-        strongest = ranked[0].get("match_score", 0)
-        relevance_floor = max(20, strongest * 0.50)
-        ranked = [row for row in ranked if row.get("match_score", 0) >= relevance_floor or row.get("exact_transcript_match")]
-    return ranked
+        row["match_score"]=match["score"]
+        row["match_explanation"]=match["reason"]
+        row["snippet"]=match["snippet"]
+        results.append(row)
+    return results
 
 INTENT_WORDS = {"about","all","any","did","discuss","discussed","episode","episodes","find","i","in","mention","mentioned","me","my","of","on","show","talk","talked","talking","the","video","videos","where"}
 CALL_IN_EPISODE_NUMBERS = (96, 97, 98, 99, 101, 103, 105, 110, 112, 115)
@@ -545,19 +487,19 @@ page = st.sidebar.radio(
     on_change=close_open_episode,
 )
 st.sidebar.caption("Everything stays on this computer.")
-st.sidebar.button("Sign out", on_click=logout, use_container_width=True)
-if is_localhost():
-    st.sidebar.divider()
-    st.sidebar.button("⏹ Stop App", on_click=request_app_stop, use_container_width=True)
-    if st.session_state.get("confirm_app_stop"):
-        st.sidebar.warning("Stop the WLHL Knowledge Base now?")
-        stop_yes, stop_no = st.sidebar.columns(2)
-        stop_yes.button("Yes, stop", type="primary", on_click=stop_local_app, use_container_width=True)
-        stop_no.button("Cancel", on_click=cancel_app_stop, use_container_width=True)
-    if st.session_state.get("confirm_app_stop") is False and st.session_state.get("_stop_message"):
-        st.sidebar.success("App stopped. You can close this browser tab.")
+st.sidebar.divider()
+st.sidebar.button("⏹ Stop App", on_click=request_app_stop, use_container_width=True)
+if st.session_state.get("confirm_app_stop"):
+    st.sidebar.warning("Stop the WLHL Knowledge Base now?")
+    stop_yes, stop_no = st.sidebar.columns(2)
+    stop_yes.button("Yes, stop", type="primary", on_click=stop_local_app, use_container_width=True)
+    stop_no.button("Cancel", on_click=cancel_app_stop, use_container_width=True)
+if st.session_state.get("confirm_app_stop") is False and st.session_state.get("_stop_message"):
+    st.sidebar.success("App stopped. You can close this browser tab.")
 st.markdown('<div class="wlhl-title">The Weight Loss Hotline</div><div class="muted">Search every episode, transcript, and coaching concept.</div>', unsafe_allow_html=True)
 st.write("")
+if st.session_state.get("_episode_notice"):
+    st.success(st.session_state.pop("_episode_notice"))
 c = db()
 
 if page == "Prompt Workspace":

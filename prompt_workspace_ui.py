@@ -428,10 +428,11 @@ def render_writing_settings(conn):
     with st.form("writing-settings"):
         updated = dict(settings)
         for key, label in SETTING_LABELS.items():
-            updated[key] = st.text_area(label, settings.get(key, ""), height=220 if key in {"master_prompt", "nick_voice", "content_rules"} else 150, key=f"setting-{key}")
+            height = 520 if key == "nicks_writing_style" else 220 if key in {"master_prompt", "nick_voice", "content_rules"} else 150
+            updated[key] = st.text_area(label, settings.get(key, ""), height=height, key=f"setting-{key}")
         st.markdown("### Content-specific instructions")
         content = dict(settings.get("content_type_instructions", {}))
-        editable_ids = {"newsletter", "promotional_email", "email_sequence", "blog_article", "instagram_caption", "facebook_post", "youtube_community_post", "youtube_description", "podcast_show_notes", "youtube_titles", "thumbnail_text", "short_hooks", "landing_page", "sales_page_section", "lead_magnet", "episode_summary", "repurposing_plan"}
+        editable_ids = {"newsletter", "promotional_email", "email_sequence", "blog_article", "instagram_caption", "instagram_carousel", "facebook_post", "youtube_community_post", "youtube_description", "podcast_show_notes", "youtube_titles", "thumbnail_text", "short_hooks", "landing_page", "sales_page_section", "lead_magnet", "episode_summary", "repurposing_plan"}
         for template in TEMPLATES:
             if template.id in editable_ids:
                 content[template.id] = st.text_area(template.name, content.get(template.id, template.default_instructions), height=120, key=f"setting-template-{template.id}")

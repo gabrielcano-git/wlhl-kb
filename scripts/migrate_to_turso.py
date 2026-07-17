@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""One-way, repeatable migration of the local WLHL SQLite database to Turso.
+
+The script uses Turso's HTTP pipeline endpoint, so it has no package dependency.
+It intentionally does not print credentials or transcript contents.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sqlite3
+import sys
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE_DB = ROOT / "database.sqlite"
+MAX_STATEMENTS = 75
+MAX_PAYLOAD_BYTES = 750_000
+
+
+def load_dotenv(path: Path) -> None:
+    if not path.exists():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+def pipeline_url(database_url: str) -> str:
+    if not database_url.startswith("libsql://"):
+        raise ValueError("TURSO_DATABASE_URL must begin with libsql://")
+    return "https://" + database_url.removeprefix("libsql://").rstrip("/") + "/v2/pipeline"
+
+
+def request(endpoint: str, token: str, requests: list[dict]) -> list[dict]:
+    payload = json.dumps({"requests": requests}, separators=(",", ":")).encode()
+    req = urllib.request.Request(
+        endpoint,
+        data=payload,
+        method="POST",
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as response:
+            result = json.load(response)
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Could not reach Turso: {exc.reason}") from exc
+    for item in result.get("results", []):
+        if item.get("type") == "error":
+            raise RuntimeError(f"Turso rejected a statement: {item.get('error', {}).get('message', item)}")
+    return result.get("results", [])
+
+
+def execute_batch(endpoint: str, token: str, statements: list[tuple[str, list]]) -> None:
+    requests = [{"type": "execute", "stmt": {"sql": sql, "args": args}} for sql, args in statements]
+    request(endpoint, token, [*requests, {"type": "close"}])
+
+
+def qident(name: str) -> str:
+    return '"' + name.replace('"', '""') + '"'
+
+
+def visible_columns(db: sqlite3.Connection, table: str) -> list[str]:
+    return [row[1] for row in db.execute(f"PRAGMA table_xinfo({qident(table)})") if row[6] == 0]
+
+
+def chunks(statements: list[tuple[str, list]]):
+    batch: list[tuple[str, list]] = []
+    size = 0
+    for statement in statements:
+        statement_size = len(json.dumps(statement, separators=(",", ":")).encode())
+        if batch and (len(batch) >= MAX_STATEMENTS or size + statement_size > MAX_PAYLOAD_BYTES):
+            yield batch
+            batch, size = [], 0
+        batch.append(statement)
+        size += statement_size
+    if batch:
+        yield batch
+
+
+def migration_statements(db: sqlite3.Connection) -> tuple[list[tuple[str, list]], list[tuple[str, list]]]:
+    objects = db.execute("""
+        SELECT type, name, sql FROM sqlite_master
+        WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'
+        ORDER BY CASE type WHEN 'table' THEN 1 WHEN 'index' THEN 2 WHEN 'trigger' THEN 3 ELSE 4 END, name
+    """).fetchall()
+    shadow_tables = {row[1] for row in db.execute("PRAGMA table_list") if row[2] == "shadow"}
+    primary = [(kind, name, sql) for kind, name, sql in objects if name not in shadow_tables]
+    ddl = [("PRAGMA foreign_keys=OFF", [])]
+    ddl.extend((sql, []) for kind, _name, sql in primary if kind == "table")
+    data: list[tuple[str, list]] = []
+    for kind, table, _sql in primary:
+        if kind != "table":
+            continue
+        columns = visible_columns(db, table)
+        if not columns:
+            continue
+        names = ", ".join(qident(column) for column in columns)
+        placeholders = ", ".join("?" for _ in columns)
+        insert_sql = f"INSERT INTO {qident(table)} ({names}) VALUES ({placeholders})"
+        for row in db.execute(f"SELECT {names} FROM {qident(table)}"):
+            data.append((insert_sql, list(row)))
+    ddl.extend((sql, []) for kind, _name, sql in primary if kind in {"index", "trigger"})
+    ddl.append(("PRAGMA foreign_keys=ON", []))
+    return ddl, data
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dry-run", action="store_true", help="Validate and count the local migration without contacting Turso.")
+    args = parser.parse_args()
+    load_dotenv(ROOT / ".env")
+    database_url = os.getenv("TURSO_DATABASE_URL", "")
+    token = os.getenv("TURSO_AUTH_TOKEN", "")
+    if not SOURCE_DB.exists():
+        raise FileNotFoundError(f"Local database not found: {SOURCE_DB}")
+    if not database_url or not token:
+        raise RuntimeError("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env.")
+    with sqlite3.connect(SOURCE_DB) as db:
+        ddl, data = migration_statements(db)
+    print(f"Prepared {len(ddl)} schema statements and {len(data)} rows from {SOURCE_DB.name}.")
+    if args.dry_run:
+        return 0
+    endpoint = pipeline_url(database_url)
+    # HTTP pipeline requests do not share a transaction across requests. Each
+    # individual pipeline request is atomic, and batching keeps request bodies
+    # comfortably below Turso's HTTP size limit.
+    for batch in chunks(ddl):
+        execute_batch(endpoint, token, batch)
+    for batch in chunks(data):
+        execute_batch(endpoint, token, batch)
+    print("Migration completed successfully. The local database was not modified.")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        print(f"Migration failed: {exc}", file=sys.stderr)
+        raise SystemExit(1)

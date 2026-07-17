@@ -15,6 +15,8 @@ For example, search `videos where I talked about the Common Sense Diet` to see e
 
 **Prompt Workspace** turns episode research into a complete prompt that you can copy into ChatGPT, Claude, Gemini, or another LLM. The app does not generate marketing copy, call an AI API, require an API key, or send transcript data anywhere.
 
+The **Instagram carousel** template creates a source-grounded prompt for exactly 10 connected slides, including concise on-slide copy, an image or design idea for every slide, a complete caption, CTA, relevant hashtags, and episode source reporting.
+
 The local workflow is:
 
 1. Choose Quick Prompt or Advanced Prompt and a content type.
@@ -26,7 +28,7 @@ The local workflow is:
 
 The default source level uses database fields plus relevant transcript excerpts, which keeps prompts useful without automatically inserting every full transcript. The size indicator warns about unusually large prompts but never blocks the user.
 
-**Writing Settings** stores the editable WLHL master prompt, source priority, Nick’s voice, philosophy, content rules, preferred and forbidden language, CTA rules, formatting rules, and content-type instructions. Settings can be reset section-by-section or imported/exported as JSON.
+**Writing Settings** stores the editable WLHL master prompt, source priority, Nick’s voice, detailed Nick’s Writing Style rules and voice check, philosophy, content rules, preferred and forbidden language, CTA rules, formatting rules, and content-type instructions. Settings can be reset section-by-section or imported/exported as JSON. The detailed writing-style section is automatically inserted into every generated prompt and requires the receiving AI to apply the voice rather than merely describe it.
 
 Prompt presets and the latest 50 generated prompts are saved locally. Presets can optionally include episode selections; by default they save only the reusable configuration.
 
@@ -77,32 +79,23 @@ python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Before the first local launch, copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and replace both placeholder values. This local secrets file is ignored by Git. The app opens locally in a browser. It needs no account, server, cloud service, or internet connection after Streamlit is installed.
+The app opens locally in a browser. It needs no account, server, cloud service, or internet connection after Streamlit is installed.
 
-## Deploy on Streamlit Community Cloud
+### Turso migration
 
-This repository is ready to deploy with **Streamlit Community Cloud**. The committed `database.sqlite` is the search database used by the deployed app; do not add it to `.gitignore`.
+The local SQLite file remains the working copy. To migrate its current schema and contents to the configured Turso database, keep `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in the untracked `.env` file, then run:
 
-1. Create a private GitHub repository and upload this entire folder, including `database.sqlite`, `assets/`, `.streamlit/config.toml`, `requirements.txt`, and `runtime.txt`.
-2. Go to [share.streamlit.io](https://share.streamlit.io), create an app, select the repository and branch, and set the entrypoint to `app.py`.
-3. In **Advanced settings**, select Python 3.12 (also declared in `runtime.txt`). Then, in **Secrets**, add the following values with a unique username and a long password:
+```bash
+python3 scripts/migrate_to_turso.py
+```
 
-   ```toml
-   [auth]
-   username = "your-username"
-   password = "a-long-unique-password"
-   ```
-
-   The file `.streamlit/secrets.toml.example` is a safe template. Do not commit a real `secrets.toml` file.
-4. Deploy. Every visitor must sign in before the knowledge base is rendered. You can also restrict viewer access in Streamlit's app settings for an additional access layer.
-
-The Community Cloud deployment is suitable for **searching, browsing, exporting, and generating/downloading prompts**. Its local filesystem is not durable: edits made through Add Episode, Quotes, presets, prompt history, or Writing Settings can be lost on a restart or redeploy. Keep editorial changes in the local application, then publish them by committing the updated `database.sqlite` to GitHub and redeploying.
-
-For permanent online editing, deploy the same app on a host with a persistent disk (for example, Render) or move the writeable data from SQLite to a managed database.
+To inspect the migration without contacting Turso, use `python3 scripts/migrate_to_turso.py --dry-run`. The migration does not change `database.sqlite`.
 
 ## Search
 
-Use the large search box for a word, phrase, problem, title, topic, transcript passage, or indexed search term. Results use SQLite FTS5 and rank stronger metadata matches above ordinary transcript occurrences. Filters narrow by episode type, topic, weight-loss stage, caller, and success story.
+Use the large search box for a word, phrase, problem, title, topic, framework, takeaway, transcript passage, or indexed search term. The app builds one local search document per episode from the episode table and every related analysis table. SQLite FTS5 supplies fast normalized matching, while field-aware ranking puts titles, concepts, semantic tags, lessons, summaries, and central questions above incidental transcript mentions. Each result explains the strongest reason it matched. Repeated matches across tables still return only one episode card.
+
+The derived tables `unified_search_documents` and `unified_episode_search` are safe to rebuild. They do not replace or modify the original episode, transcript, enrichment, topic, quote, email-idea, or short-hook records.
 
 Command-line search is also available:
 
@@ -122,6 +115,12 @@ The update compares SHA-256 file hashes and processes only new or changed transc
 
 To perform a clean full build, run `python scripts/build_wlhl_knowledge_base.py`.
 
+## Edit or delete an episode
+
+Open any episode and expand **Edit Episode**. You can update its title, date, YouTube URL, episode type, caller, analysis, frameworks, tags, search queries, audience, takeaways, advice, resolution, and CTA. Saving immediately refreshes the local search indexes.
+
+The canonical episode number, transcript filename, relative transcript path, and full transcript are protected from this editor. Use **Delete Episode** only when you intend to remove the record from this copy of the app. A confirmation is required. Deleting removes related database records and search-index entries, but it never deletes or modifies an original transcript file on disk.
+
 ## Import updated episode analysis
 
 Place the latest reviewed CSV at:
@@ -138,18 +137,18 @@ Then run:
 
 The importer matches primarily by normalized episode number (`EP-090`, `EP 090`, `090`, and `90` are equivalent), validates the title, ignores identical duplicate rows, and refuses ambiguous matches. It updates the normalized `episode_enrichment`, `enrichment_values`, and `enrichment_search` tables inside `database.sqlite`. It never updates transcript text or YouTube URLs. A timestamped database backup is created under `database/backups/` before each import, and the validation result is saved to `database/enrichment_import_report.json`.
 
-After importing, stop and reopen the app using `Open WLHL.command`, or refresh the browser if the app was already restarted.
+After importing, stop and reopen the app using `Abrir WLHL.command`, or refresh the browser if the app was already restarted.
 
 ## SQLite
 
-Open `database.sqlite` with DB Browser for SQLite or the `sqlite3` command. Core tables are `episodes`, `topics`, `episode_topics`, `episode_terms`, `quotes`, `email_ideas`, `short_hooks`, and `processing_issues`. `episode_search` is the FTS5 index. Prompt Workspace uses the separate `prompt_settings`, `prompt_presets`, and `prompt_history` tables; it never writes to the episode or transcript tables.
+Open `database.sqlite` with DB Browser for SQLite or the `sqlite3` command. Core source tables are `episodes`, `episode_enrichment`, `enrichment_values`, `topics`, `episode_topics`, `episode_terms`, `quotes`, `email_ideas`, `short_hooks`, and `processing_issues`. `unified_search_documents` combines their searchable content by episode and `unified_episode_search` is its FTS5 index. The older `episode_search` and `enrichment_search` indexes remain intact for compatibility. Prompt Workspace uses the separate `prompt_settings`, `prompt_presets`, and `prompt_history` tables; it never writes to the episode or transcript tables.
 
 Example:
 
 ```sql
 SELECT e.episode_id, e.episode_title
-FROM episode_search s JOIN episodes e ON e.id=s.episode_db_id
-WHERE episode_search MATCH 'plateau';
+FROM unified_episode_search s JOIN episodes e ON e.id=s.rowid
+WHERE unified_episode_search MATCH 'plateau';
 ```
 
 ## Excel and exports

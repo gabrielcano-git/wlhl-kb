@@ -46,6 +46,44 @@ TEMPLATES = [
     _template("email_sequence", "Email sequence", "Email", "A connected sequence with a clear progression.", "Create a cohesive sequence in which each email has one job and naturally leads to the next.", ["Sequence overview", "Subject and preview text for each email", "Complete emails", "Sequence CTA"], ("number_of_emails", "email_goals", "sequence_cta")),
     _template("social_media", "Social media", "Social media", "A platform-neutral social post.", "Turn one supported episode idea into a useful, conversational social post.", ["Complete post", "Optional CTA"]),
     _template("instagram_caption", "Instagram caption", "Social media", "An Instagram caption designed for clear mobile reading.", "Write a natural Instagram caption with a strong first line and no engagement bait.", ["Caption", "Optional CTA", "Optional relevant hashtags"]),
+    _template(
+        "instagram_carousel",
+        "Instagram carousel",
+        "Social media",
+        "A complete 10-slide Instagram carousel with copy, visual direction, caption, and hashtags.",
+        """Create an English Instagram carousel for The Weight Loss Hotline using only the supplied episode material.
+
+Build the carousel around one clear, specific central lesson. The carousel must contain exactly 10 slides and should feel like one connected story rather than ten unrelated tips.
+
+Slide 1 must be a strong, accurate cover hook that creates curiosity without manipulative clickbait. Slides 2–3 should establish the relatable problem, mistaken belief, or situation. Slides 4–8 should develop the lesson using supported explanations, examples, stories, or practical steps. Slide 9 should give the reader a useful takeaway or reflection. Slide 10 should close naturally with a relevant, low-pressure CTA.
+
+For every slide, provide:
+- The slide number and purpose.
+- Concise on-slide copy that remains readable on a phone.
+- A specific image or design idea that supports the message instead of merely decorating it.
+- Suggested visual hierarchy or emphasis when useful.
+
+Visual ideas may include realistic everyday situations, podcast imagery, simple typography, objects, environments, diagrams, or symbolic concepts. Do not invent photographs, memories, events, physical transformations, before-and-after results, or personal details that are not supported by the selected episodes. Clearly identify when an idea requires an existing photo or episode asset rather than pretending that asset exists.
+
+After the slides, write one complete Instagram caption in Nick’s natural voice. The caption should add context rather than repeat every slide. Include a direct but human CTA appropriate to the user’s request.
+
+Provide a focused set of relevant hashtags. Avoid generic hashtag stuffing, misleading trending tags, and hashtags unsupported by the subject. Prefer specific weight-loss, behavior-change, mindset, episode, and WLHL terms that genuinely fit the carousel.
+
+Preserve the meaning of Nick’s advice. Never invent quotes. If exact source wording is used, label it as an exact quote and include it only when explicitly present in the supplied material.""",
+        [
+            "Carousel title and central concept",
+            "Exactly 10 numbered slides",
+            "Purpose of each slide",
+            "Concise on-slide text for each slide",
+            "Image or design direction for each slide",
+            "Visual hierarchy or emphasized words when useful",
+            "Complete Instagram caption",
+            "Relevant low-pressure CTA",
+            "Focused set of relevant hashtags",
+            "Episodes and source concepts used",
+            "Exact-quote labels only when verified in the source material",
+        ],
+    ),
     _template("facebook_post", "Facebook post", "Social media", "A conversational Facebook post.", "Write for thoughtful reading and discussion without manufacturing controversy.", ["Complete Facebook post", "Optional CTA"]),
     _template("youtube_community_post", "YouTube community post", "Social media", "A concise post for the WLHL YouTube audience.", "Write a direct community post that invites useful reflection or episode viewing.", ["Complete community post", "Optional question or CTA"]),
     _template("threads_post", "Threads post", "Social media", "A concise Threads post or short thread.", "Use short natural paragraphs. Avoid vague inspirational statements.", ["Post or numbered thread", "Optional CTA"]),
@@ -73,4 +111,3 @@ TEMPLATES = [
 
 TEMPLATES_BY_ID = {template.id: template for template in TEMPLATES}
 CATEGORIES = list(dict.fromkeys(template.category for template in TEMPLATES))
-
