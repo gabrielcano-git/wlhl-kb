@@ -1,5 +1,5 @@
 # Transcript source folder
 
-The original transcript files were intentionally not copied, moved, renamed, or overwritten when this project was built. The current database already contains the indexed transcript text, so the application works offline without source files.
+The Streamlit application reads transcript text from Turso and requires network access. It does not read files from this folder at runtime.
 
-For future updates on another computer, place only newly published canonical `.txt` transcript files in this folder and run `python update_database.py`. Existing database records are preserved. Alternatively, edit `config.json` so `transcript_directory` points to a sibling canonical transcript folder using a relative path.
+This folder exists only for the separate, local database-maintenance utilities. Those utilities may ingest newly published canonical `.txt` transcripts into a local SQLite working file before an intentional administrative migration. They never update the production Turso database automatically. Existing source files should not be moved, renamed, or overwritten.

@@ -5,13 +5,13 @@ import hashlib
 import html
 import json
 import re
-import sqlite3
 import unicodedata
+
+from db_compat import execute_script, row_field
 
 
 # The document and FTS tables are derived data.  Keep a separate schema version
-# so deployments can safely replace an older index stored in a persistent SQLite
-# database (as used by Streamlit Cloud).
+# so deployments can safely replace an older derived index stored in Turso.
 INDEX_VERSION = "wlhl-unified-search-v2"
 INDEX_SCHEMA_VERSION = "2"
 INDEX_COLUMNS = [
@@ -81,11 +81,11 @@ def _unique(values) -> list[str]:
     return result
 
 
-def create_schema(conn: sqlite3.Connection) -> None:
+def create_schema(conn, *, commit: bool = True) -> None:
     # Keep the portable document index available even on SQLite builds that do
     # not include the optional FTS5 extension (some hosted Python runtimes).
     required_columns = {"episode_db_id", *INDEX_COLUMNS, "source_map_json"}
-    conn.executescript("""
+    execute_script(conn, """
     CREATE TABLE IF NOT EXISTS unified_search_documents (
       episode_db_id INTEGER PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,
       episode_number TEXT, title TEXT, publish_date TEXT, main_category TEXT,
@@ -102,13 +102,13 @@ def create_schema(conn: sqlite3.Connection) -> None:
     # finds an older layout rather than failing on INSERT with (for example)
     # "table ... has no column named source_map_json".
     document_columns = {
-        row["name"] for row in conn.execute("PRAGMA table_info(unified_search_documents)")
+        row_field(row, "name", 1) for row in conn.execute("PRAGMA table_info(unified_search_documents)")
     }
     schema_version = conn.execute(
         "SELECT value FROM unified_search_meta WHERE key='schema_version'"
     ).fetchone()
     if document_columns != required_columns or not schema_version or schema_version[0] != INDEX_SCHEMA_VERSION:
-        conn.executescript("""
+        execute_script(conn, """
         DROP TABLE IF EXISTS unified_episode_search;
         DROP TABLE IF EXISTS unified_search_documents;
         DROP TABLE IF EXISTS unified_search_meta;
@@ -133,17 +133,16 @@ def create_schema(conn: sqlite3.Connection) -> None:
       tokenize='porter unicode61 remove_diacritics 2'
     )
         """)
-    except sqlite3.OperationalError as error:
-        if "fts5" not in str(error).lower() and "module" not in str(error).lower():
-            raise
+    except Exception:
         # Search still works through unified_search_documents. FTS5 only adds
         # stemming and a small ranking bonus; it is not the source of truth.
-        conn.rollback()
+        pass
     conn.execute(
         "INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('schema_version',?)",
         (INDEX_SCHEMA_VERSION,),
     )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
 def _related_values(conn, episode_id: int):
@@ -168,7 +167,7 @@ def _related_values(conn, episode_id: int):
     return values, topics, quotes, emails, hooks
 
 
-def build_document(conn: sqlite3.Connection, episode_id: int) -> dict:
+def build_document(conn, episode_id: int) -> dict:
     episode=conn.execute("SELECT * FROM episodes WHERE id=?", (episode_id,)).fetchone()
     if not episode: return {}
     meta=conn.execute("SELECT * FROM episode_enrichment WHERE episode_id=?", (episode_id,)).fetchone()
@@ -206,7 +205,7 @@ def build_document(conn: sqlite3.Connection, episode_id: int) -> dict:
     return document
 
 
-def source_fingerprint(conn: sqlite3.Connection) -> str:
+def source_fingerprint(conn) -> str:
     digest=hashlib.sha256(INDEX_VERSION.encode())
     queries=[
         "SELECT * FROM episodes ORDER BY id", "SELECT * FROM episode_enrichment ORDER BY episode_id",
@@ -222,8 +221,12 @@ def source_fingerprint(conn: sqlite3.Connection) -> str:
     return digest.hexdigest()
 
 
-def rebuild_index(conn: sqlite3.Connection) -> int:
-    create_schema(conn)
+def rebuild_index(conn, *, commit: bool = True) -> int:
+    # CRUD calls use commit=False inside an existing transaction. The schema is
+    # guaranteed by application startup; avoiding executescript here preserves
+    # the caller's transaction boundary on sqlite3 and libsql alike.
+    if commit:
+        create_schema(conn, commit=False)
     fingerprint=source_fingerprint(conn)
     conn.execute("DELETE FROM unified_search_documents")
     columns=["episode_db_id", *INDEX_COLUMNS, "source_map_json"]
@@ -238,30 +241,54 @@ def rebuild_index(conn: sqlite3.Connection) -> int:
         count+=1
     try:
         conn.execute("INSERT INTO unified_episode_search(unified_episode_search) VALUES('rebuild')")
-    except sqlite3.OperationalError as error:
-        if "fts5" not in str(error).lower() and "module" not in str(error).lower() and "no such table" not in str(error).lower():
-            raise
+    except Exception:
+        # Optional FTS maintenance must never prevent the portable document
+        # index from becoming available on remote libsql deployments.
+        pass
     conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('fingerprint',?)", (fingerprint,))
     conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('version',?)", (INDEX_VERSION,))
-    conn.commit()
+    if commit:
+        conn.commit()
     return count
 
 
-def ensure_index(conn: sqlite3.Connection) -> bool:
-    create_schema(conn)
-    stored=conn.execute("SELECT value FROM unified_search_meta WHERE key='fingerprint'").fetchone()
-    episode_count=conn.execute("SELECT COUNT(*) FROM episodes").fetchone()[0]
-    index_count=conn.execute("SELECT COUNT(*) FROM unified_search_documents").fetchone()[0]
-    fingerprint=source_fingerprint(conn)
-    if not stored or stored[0] != fingerprint or episode_count != index_count:
-        rebuild_index(conn)
-        return True
-    return False
+def portable_index_is_usable(conn) -> bool:
+    """Return whether the read-only document index covers every episode."""
+    try:
+        episode_count = conn.execute("SELECT COUNT(*) FROM episodes").fetchone()[0]
+        index_count = conn.execute("SELECT COUNT(*) FROM unified_search_documents").fetchone()[0]
+        return episode_count == index_count and episode_count > 0
+    except Exception:
+        return False
 
 
-def refresh_episode(conn: sqlite3.Connection, episode_id: int) -> None:
+def ensure_index(conn) -> bool:
+    try:
+        create_schema(conn)
+        stored=conn.execute("SELECT value FROM unified_search_meta WHERE key='fingerprint'").fetchone()
+        episode_count=conn.execute("SELECT COUNT(*) FROM episodes").fetchone()[0]
+        index_count=conn.execute("SELECT COUNT(*) FROM unified_search_documents").fetchone()[0]
+        fingerprint=source_fingerprint(conn)
+        if not stored or stored[0] != fingerprint or episode_count != index_count:
+            rebuild_index(conn)
+            return True
+        return False
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        # A migrated Turso database can already have a complete portable index
+        # while its token or remote protocol disallows startup DDL/FTS upkeep.
+        # Reads remain correct, so do not make optional maintenance fatal.
+        if portable_index_is_usable(conn):
+            return False
+        raise
+
+
+def refresh_episode(conn, episode_id: int, *, commit: bool = True) -> None:
     # Rebuilding 127 compact documents is fast and guarantees cross-table consistency.
-    rebuild_index(conn)
+    rebuild_index(conn, commit=commit)
 
 
 def _query_terms(query: str):
@@ -284,7 +311,7 @@ def _fts_ranks(conn, tokens, expansions):
     sql=f"SELECT rowid,bm25(unified_episode_search,{','.join(str(value) for value in weights)}) rank FROM unified_episode_search WHERE unified_episode_search MATCH ?"
     try:
         return {row[0]:abs(float(row[1])) for row in conn.execute(sql,(expression,))}
-    except sqlite3.OperationalError:
+    except Exception:
         return {}
 
 
@@ -320,8 +347,9 @@ def _tokens_nearby(text: str, tokens: list[str], max_span: int = 180) -> bool:
     return False
 
 
-def search(conn: sqlite3.Connection, query: str) -> list[dict]:
-    create_schema(conn)
+def search(conn, query: str) -> list[dict]:
+    if not portable_index_is_usable(conn):
+        create_schema(conn)
     query_norm,tokens,expansions=_query_terms(query)
     if not query_norm: return []
     fts_ranks=_fts_ranks(conn,tokens,expansions)

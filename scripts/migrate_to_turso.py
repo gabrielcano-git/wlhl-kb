@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-way, repeatable migration of the local WLHL SQLite database to Turso.
+"""One-way migration of an explicit local WLHL SQLite database to Turso.
 
 The script uses Turso's HTTP pipeline endpoint, so it has no package dependency.
 It intentionally does not print credentials or transcript contents.
@@ -17,7 +17,6 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DB = ROOT / "database.sqlite"
 MAX_STATEMENTS = 75
 MAX_PAYLOAD_BYTES = 750_000
 
@@ -112,22 +111,45 @@ def migration_statements(db: sqlite3.Connection) -> tuple[list[tuple[str, list]]
     return ddl, data
 
 
-def main() -> int:
+def validate_source(db: sqlite3.Connection, source: Path) -> int:
+    table = db.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='episodes'"
+    ).fetchone()
+    if not table:
+        raise ValueError(f"Migration source {source.name} does not contain an episodes table.")
+    count = int(db.execute("SELECT COUNT(*) FROM episodes").fetchone()[0])
+    if count < 1:
+        raise ValueError(f"Migration source {source.name} contains no episodes; refusing an empty migration.")
+    return count
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source",
+        required=True,
+        type=Path,
+        help="Explicit local SQLite source. Runtime never reads this file.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Validate and count the local migration without contacting Turso.")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     load_dotenv(ROOT / ".env")
-    database_url = os.getenv("TURSO_DATABASE_URL", "")
-    token = os.getenv("TURSO_AUTH_TOKEN", "")
-    if not SOURCE_DB.exists():
-        raise FileNotFoundError(f"Local database not found: {SOURCE_DB}")
-    if not database_url or not token:
-        raise RuntimeError("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env.")
-    with sqlite3.connect(SOURCE_DB) as db:
+    source = args.source.expanduser().resolve()
+    if not source.is_file():
+        raise FileNotFoundError(f"Local migration source not found: {source}")
+    with sqlite3.connect(source) as db:
+        episode_count = validate_source(db, source)
         ddl, data = migration_statements(db)
-    print(f"Prepared {len(ddl)} schema statements and {len(data)} rows from {SOURCE_DB.name}.")
+    print(
+        f"Validated {episode_count} episodes; prepared {len(ddl)} schema statements "
+        f"and {len(data)} rows from {source.name}."
+    )
     if args.dry_run:
         return 0
+    database_url = os.getenv("TURSO_DATABASE_URL", "")
+    token = os.getenv("TURSO_AUTH_TOKEN", "")
+    if not database_url or not token:
+        raise RuntimeError("Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in .env before a live migration.")
     endpoint = pipeline_url(database_url)
     # HTTP pipeline requests do not share a transaction across requests. Each
     # individual pipeline request is atomic, and batching keeps request bodies

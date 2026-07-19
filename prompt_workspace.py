@@ -7,6 +7,7 @@ import sqlite3
 import unicodedata
 from datetime import datetime
 
+from db_compat import execute_script
 from prompt_templates import TEMPLATES_BY_ID
 
 
@@ -159,7 +160,7 @@ SETTING_LABELS = {
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
-    conn.executescript("""
+    execute_script(conn, """
     CREATE TABLE IF NOT EXISTS prompt_settings (
       id INTEGER PRIMARY KEY CHECK(id=1), settings_json TEXT NOT NULL, last_mode TEXT NOT NULL DEFAULT 'Quick Prompt', updated_at TEXT NOT NULL
     );

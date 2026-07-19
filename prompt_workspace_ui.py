@@ -1,4 +1,4 @@
-"""Streamlit interface for the local WLHL Prompt Workspace."""
+"""Streamlit interface for the WLHL Prompt Workspace."""
 from __future__ import annotations
 
 import html
@@ -391,7 +391,7 @@ def render_prompt_workspace(conn, search_callback, enrichment_callback, open_epi
     init_schema(conn)
     _init_state(conn)
     st.subheader("Prompt Workspace")
-    st.caption("Research episodes and build a complete prompt locally. Nothing is sent to an AI service.")
+    st.caption("Research Turso episodes and build a complete prompt in this app. Nothing is sent to an AI service.")
     mode = st.radio("Workspace mode", ["Quick Prompt", "Advanced Prompt"], horizontal=True, index=0 if st.session_state.pw_mode == "Quick Prompt" else 1, key="pw-mode-widget")
     if mode != st.session_state.pw_mode:
         st.session_state.pw_mode = mode
@@ -424,7 +424,7 @@ def render_writing_settings(conn):
     init_schema(conn)
     settings = get_settings(conn)
     st.subheader("Writing Settings")
-    st.caption("These reusable instructions are saved only in the local WLHL database and are included automatically in generated prompts.")
+    st.caption("These reusable instructions are saved in the Turso WLHL database and are included automatically in generated prompts.")
     with st.form("writing-settings"):
         updated = dict(settings)
         for key, label in SETTING_LABELS.items():
@@ -439,7 +439,7 @@ def render_writing_settings(conn):
         updated["content_type_instructions"] = content
         if st.form_submit_button("Save settings", type="primary", use_container_width=True):
             save_settings(conn, updated)
-            st.success("Writing settings saved locally.")
+            st.success("Writing settings saved to Turso.")
     st.divider()
     st.markdown("### Reset or transfer settings")
     reset_options = {label: key for key, label in SETTING_LABELS.items()}

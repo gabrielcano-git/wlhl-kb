@@ -1,4 +1,4 @@
-"""Modular content-type catalog for the local WLHL Prompt Workspace."""
+"""Modular content-type catalog for the WLHL Prompt Workspace."""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass

@@ -1,0 +1,22 @@
+services:
+  wlhl-kb:
+    platform: linux/amd64
+    build:
+      context: .
+    ports:
+      - "8501:8501"
+    environment:
+      WLHL_AUTH_USERNAME: ${WLHL_AUTH_USERNAME:?Configure WLHL_AUTH_USERNAME in .env}
+      WLHL_AUTH_PASSWORD: ${WLHL_AUTH_PASSWORD:?Configure WLHL_AUTH_PASSWORD in .env}
+      TURSO_DATABASE_URL: ${TURSO_DATABASE_URL:?Configure TURSO_DATABASE_URL in .env}
+      TURSO_AUTH_TOKEN: ${TURSO_AUTH_TOKEN:?Configure TURSO_AUTH_TOKEN in .env}
+      WLHL_RUNTIME: local-docker
+    volumes:
+      # Desenvolvimento local: o código é recarregado; dados de runtime ficam no Turso.
+      - .:/app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s

@@ -1,0 +1,11 @@
+.git
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.streamlit/secrets.toml
+database/backups/
+*.log
+*.sqlite
+tests/
