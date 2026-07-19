@@ -205,20 +205,55 @@ def build_document(conn, episode_id: int) -> dict:
     return document
 
 
-def source_fingerprint(conn) -> str:
-    digest=hashlib.sha256(INDEX_VERSION.encode())
-    queries=[
-        "SELECT * FROM episodes ORDER BY id", "SELECT * FROM episode_enrichment ORDER BY episode_id",
-        "SELECT * FROM enrichment_values ORDER BY episode_id,kind,value",
-        "SELECT * FROM episode_terms ORDER BY episode_id,kind,value",
-        "SELECT * FROM episode_topics ORDER BY episode_id,topic_id",
-        "SELECT * FROM topics ORDER BY id", "SELECT * FROM quotes ORDER BY id",
-        "SELECT * FROM email_ideas ORDER BY id", "SELECT * FROM short_hooks ORDER BY id",
-    ]
-    for sql in queries:
-        for row in conn.execute(sql):
-            digest.update(json.dumps(list(row), ensure_ascii=False, default=str, separators=(",", ":")).encode())
-    return digest.hexdigest()
+# Cheap change-detection signal. Each expression is a server-side aggregate
+# (COUNT / MAX / SUM(LENGTH(...))) that returns a single number, so the whole
+# signature is one round trip that never transfers transcripts or other content.
+# It detects inserts, deletes, and edits to indexed text; application writes also
+# refresh this signature directly so the startup fast-path stays valid.
+_SIGNATURE_EXPRESSIONS = [
+    ("episodes", "COUNT(*)"),
+    ("episodes", "IFNULL(MAX(id),0)"),
+    ("episodes", "IFNULL(SUM(LENGTH(COALESCE(transcript,''))),0)"),
+    ("episodes",
+     "IFNULL(SUM(LENGTH(COALESCE(episode_title,''))+LENGTH(COALESCE(short_summary,''))"
+     "+LENGTH(COALESCE(detailed_summary,''))+LENGTH(COALESCE(nicks_main_advice,''))"
+     "+LENGTH(COALESCE(caller_problem,''))+LENGTH(COALESCE(main_category,''))"
+     "+LENGTH(COALESCE(central_struggle,''))+LENGTH(COALESCE(core_coaching_theme,''))),0)"),
+    ("episode_enrichment", "COUNT(*)"),
+    ("episode_enrichment",
+     "IFNULL(SUM(LENGTH(COALESCE(source_episode_title,''))+LENGTH(COALESCE(central_question,''))"
+     "+LENGTH(COALESCE(central_struggle,''))+LENGTH(COALESCE(core_coaching_theme,''))"
+     "+LENGTH(COALESCE(primary_nick_framework,''))+LENGTH(COALESCE(main_category,''))"
+     "+LENGTH(COALESCE(simple_tags,''))+LENGTH(COALESCE(topic_tags,''))"
+     "+LENGTH(COALESCE(key_takeaways,''))+LENGTH(COALESCE(secondary_nick_frameworks,''))),0)"),
+    ("enrichment_values", "COUNT(*)"),
+    ("enrichment_values", "IFNULL(SUM(LENGTH(COALESCE(value,''))),0)"),
+    ("episode_terms", "COUNT(*)"),
+    ("episode_terms", "IFNULL(SUM(LENGTH(COALESCE(value,''))),0)"),
+    ("episode_topics", "COUNT(*)"),
+    ("episode_topics", "IFNULL(SUM(COALESCE(topic_id,0)),0)"),
+    ("episode_topics", "IFNULL(SUM(COALESCE(is_primary,0)),0)"),
+    ("topics", "COUNT(*)"),
+    ("topics", "IFNULL(SUM(LENGTH(COALESCE(name,''))),0)"),
+    ("quotes", "COUNT(*)"),
+    ("quotes", "IFNULL(MAX(id),0)"),
+    ("quotes", "IFNULL(SUM(LENGTH(COALESCE(quote,''))+LENGTH(COALESCE(speaker,''))+LENGTH(COALESCE(topic,''))),0)"),
+    ("email_ideas", "COUNT(*)"),
+    ("email_ideas", "IFNULL(MAX(id),0)"),
+    ("email_ideas",
+     "IFNULL(SUM(LENGTH(COALESCE(idea,''))+LENGTH(COALESCE(suggested_subject,''))"
+     "+LENGTH(COALESCE(cta,''))+LENGTH(COALESCE(topic,''))),0)"),
+    ("short_hooks", "COUNT(*)"),
+    ("short_hooks", "IFNULL(MAX(id),0)"),
+    ("short_hooks", "IFNULL(SUM(LENGTH(COALESCE(hook,''))+LENGTH(COALESCE(exact_or_adapted,''))+LENGTH(COALESCE(topic,''))),0)"),
+]
+SIGNATURE_SQL = "SELECT " + ", ".join(f"(SELECT {expr} FROM {table})" for table, expr in _SIGNATURE_EXPRESSIONS)
+
+
+def source_signature(conn) -> str:
+    row = conn.execute(SIGNATURE_SQL).fetchone()
+    parts = [INDEX_VERSION, *("" if value is None else str(value) for value in row)]
+    return hashlib.sha256("\n".join(parts).encode()).hexdigest()
 
 
 def rebuild_index(conn, *, commit: bool = True) -> int:
@@ -227,7 +262,7 @@ def rebuild_index(conn, *, commit: bool = True) -> int:
     # the caller's transaction boundary on sqlite3 and libsql alike.
     if commit:
         create_schema(conn, commit=False)
-    fingerprint=source_fingerprint(conn)
+    signature=source_signature(conn)
     conn.execute("DELETE FROM unified_search_documents")
     columns=["episode_db_id", *INDEX_COLUMNS, "source_map_json"]
     placeholders=",".join("?" for _ in columns)
@@ -245,7 +280,7 @@ def rebuild_index(conn, *, commit: bool = True) -> int:
         # Optional FTS maintenance must never prevent the portable document
         # index from becoming available on remote libsql deployments.
         pass
-    conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('fingerprint',?)", (fingerprint,))
+    conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('signature',?)", (signature,))
     conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('version',?)", (INDEX_VERSION,))
     if commit:
         conn.commit()
@@ -262,17 +297,43 @@ def portable_index_is_usable(conn) -> bool:
         return False
 
 
+def _index_state(conn):
+    """Return counts, schema version, and stored signature in one round trip.
+
+    Returns None when the index tables are absent, signalling a first build.
+    """
+    try:
+        row = conn.execute(
+            "SELECT (SELECT COUNT(*) FROM episodes),"
+            " (SELECT COUNT(*) FROM unified_search_documents),"
+            " (SELECT value FROM unified_search_meta WHERE key='schema_version'),"
+            " (SELECT value FROM unified_search_meta WHERE key='signature')"
+        ).fetchone()
+    except Exception:
+        return None
+    return {"episodes": row[0], "documents": row[1], "schema_version": row[2], "signature": row[3]}
+
+
 def ensure_index(conn) -> bool:
     try:
-        create_schema(conn)
-        stored=conn.execute("SELECT value FROM unified_search_meta WHERE key='fingerprint'").fetchone()
-        episode_count=conn.execute("SELECT COUNT(*) FROM episodes").fetchone()[0]
-        index_count=conn.execute("SELECT COUNT(*) FROM unified_search_documents").fetchone()[0]
-        fingerprint=source_fingerprint(conn)
-        if not stored or stored[0] != fingerprint or episode_count != index_count:
-            rebuild_index(conn)
+        state = _index_state(conn)
+        if state is None:
+            rebuild_index(conn)  # creates the schema and builds every document
             return True
-        return False
+        signature = source_signature(conn)
+        schema_current = state["schema_version"] == INDEX_SCHEMA_VERSION
+        complete = state["episodes"] == state["documents"] and state["episodes"] > 0
+        if schema_current and complete and state["signature"] == signature:
+            return False
+        if schema_current and complete and state["signature"] is None:
+            # Upgrade path: a complete index maintained by an earlier version has
+            # no stored signature yet. Trust it and record the cheap signature
+            # instead of paying for one full rebuild after deploying this change.
+            conn.execute("INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('signature',?)", (signature,))
+            conn.commit()
+            return False
+        rebuild_index(conn)
+        return True
     except Exception:
         try:
             conn.rollback()
@@ -286,9 +347,59 @@ def ensure_index(conn) -> bool:
         raise
 
 
+def _fts_forget(conn, document_row) -> None:
+    """Best-effort removal of an episode's old terms from the external-content FTS."""
+    if document_row is None:
+        return
+    try:
+        conn.execute(
+            f"INSERT INTO unified_episode_search(unified_episode_search, rowid, {','.join(INDEX_COLUMNS)}) "
+            f"VALUES('delete', ?, {','.join('?' for _ in INDEX_COLUMNS)})",
+            [document_row["episode_db_id"], *[document_row[column] or "" for column in INDEX_COLUMNS]],
+        )
+    except Exception:
+        pass
+
+
+def _fts_index(conn, episode_id: int, document: dict) -> None:
+    """Best-effort insert of an episode's terms into the external-content FTS."""
+    try:
+        conn.execute(
+            f"INSERT INTO unified_episode_search(rowid, {','.join(INDEX_COLUMNS)}) "
+            f"VALUES(?, {','.join('?' for _ in INDEX_COLUMNS)})",
+            [episode_id, *[document.get(column, "") for column in INDEX_COLUMNS]],
+        )
+    except Exception:
+        pass
+
+
 def refresh_episode(conn, episode_id: int, *, commit: bool = True) -> None:
-    # Rebuilding 127 compact documents is fast and guarantees cross-table consistency.
-    rebuild_index(conn, commit=commit)
+    """Update just this episode's search document in place.
+
+    A single-row update keeps CRUD fast over the remote database; a full rebuild
+    of all documents happens only at startup or on a schema change. The stored
+    signature is refreshed so the next startup takes the no-rebuild fast path.
+    """
+    old = conn.execute(
+        "SELECT * FROM unified_search_documents WHERE episode_db_id=?", (episode_id,)
+    ).fetchone()
+    document = build_document(conn, episode_id)
+    _fts_forget(conn, old)
+    if not document:
+        conn.execute("DELETE FROM unified_search_documents WHERE episode_db_id=?", (episode_id,))
+    else:
+        columns = ["episode_db_id", *INDEX_COLUMNS, "source_map_json"]
+        conn.execute(
+            f"INSERT OR REPLACE INTO unified_search_documents({','.join(columns)}) "
+            f"VALUES({','.join('?' for _ in columns)})",
+            [document.get(column, "") for column in columns],
+        )
+        _fts_index(conn, episode_id, document)
+    conn.execute(
+        "INSERT OR REPLACE INTO unified_search_meta(key,value) VALUES('signature',?)", (source_signature(conn),)
+    )
+    if commit:
+        conn.commit()
 
 
 def _query_terms(query: str):
