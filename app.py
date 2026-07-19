@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import csv
 import io
+import json
 import os
 import signal
 import threading
@@ -20,6 +21,7 @@ from database_connection import (
     validate_schema,
 )
 from episode_service import (
+    ENRICHMENT_LISTS,
     create_episode,
     delete_episode as delete_episode_record,
     delete_related_content,
@@ -120,24 +122,43 @@ def export_database_csv():
         "Search Queries", "Hidden Concepts", "Myths Debunked", "Key Takeaways", "Caller Questions",
         "Memorable Quotes", "Email Ideas", "Short Hooks", "Transcript",
     ]
+    # Bulk-fetch related rows once instead of issuing four queries per episode.
+    # Over the remote Turso connection the per-episode form made ~500 round
+    # trips and blocked the page for minutes; grouping keeps it to a handful.
+    enrichment_by_id: dict = {}
+    for row in connection.execute("SELECT * FROM episode_enrichment"):
+        data = dict(row)
+        for field in ENRICHMENT_LISTS:
+            try:
+                data[field] = json.loads(data.get(field) or "[]")
+            except (TypeError, json.JSONDecodeError):
+                data[field] = []
+        enrichment_by_id[data["episode_id"]] = data
+    quotes_by_id: dict = {}
+    for item in connection.execute("SELECT episode_id,quote,speaker FROM quotes ORDER BY episode_id,id"):
+        quotes_by_id.setdefault(item["episode_id"], []).append(
+            f"{item['quote']} — {item['speaker'] or 'Unknown speaker'}"
+        )
+    emails_by_id: dict = {}
+    for item in connection.execute("SELECT episode_id,idea,suggested_subject,cta FROM email_ideas ORDER BY episode_id,id"):
+        emails_by_id.setdefault(item["episode_id"], []).append(
+            " | ".join(part for part in [item["idea"], item["suggested_subject"], item["cta"]] if part)
+        )
+    hooks_by_id: dict = {}
+    for item in connection.execute("SELECT episode_id,hook,exact_or_adapted FROM short_hooks ORDER BY episode_id,id"):
+        hooks_by_id.setdefault(item["episode_id"], []).append(
+            " | ".join(part for part in [item["hook"], item["exact_or_adapted"]] if part)
+        )
+
     output = io.StringIO(newline="")
     writer = csv.writer(output)
     writer.writerow(headers)
-    for episode in connection.execute("SELECT * FROM episodes ORDER BY episode_number,episode_title"):
-        meta = enrichment(episode["id"])
+    for episode in connection.execute("SELECT * FROM episodes ORDER BY episode_number,episode_title").fetchall():
+        meta = enrichment_by_id.get(episode["id"], {})
         list_text = lambda field: "; ".join(str(value) for value in meta.get(field, []) if value)
-        quotes = "\n".join(
-            f"{item['quote']} — {item['speaker'] or 'Unknown speaker'}"
-            for item in connection.execute("SELECT quote,speaker FROM quotes WHERE episode_id=? ORDER BY id", (episode["id"],))
-        )
-        email_ideas = "\n".join(
-            " | ".join(part for part in [item["idea"], item["suggested_subject"], item["cta"]] if part)
-            for item in connection.execute("SELECT idea,suggested_subject,cta FROM email_ideas WHERE episode_id=? ORDER BY id", (episode["id"],))
-        )
-        hooks = "\n".join(
-            " | ".join(part for part in [item["hook"], item["exact_or_adapted"]] if part)
-            for item in connection.execute("SELECT hook,exact_or_adapted FROM short_hooks WHERE episode_id=? ORDER BY id", (episode["id"],))
-        )
+        quotes = "\n".join(quotes_by_id.get(episode["id"], []))
+        email_ideas = "\n".join(emails_by_id.get(episode["id"], []))
+        hooks = "\n".join(hooks_by_id.get(episode["id"], []))
         writer.writerow([
             episode["episode_id"], episode["episode_number"], episode["episode_title"], episode["publish_date"],
             episode["youtube_url"], episode["transcript_filename"], episode["relative_transcript_path"],
@@ -508,13 +529,21 @@ elif page == "Search":
 
 elif page == "All Episodes":
     heading,add_action,export_action=st.columns([4,1.5,1.7]);heading.subheader("All Episodes");add_action.button("＋ Add New Episode",on_click=go_to_add_episode,use_container_width=True,type="primary")
-    export_action.download_button(
-        "⬇ Export Database",
-        data=export_database_csv(),
-        file_name=f"WLHL_Episode_Database_{date.today().isoformat()}.csv",
-        mime="text/csv",
-        use_container_width=True,
-    )
+    # Build the CSV only when requested. Generating it eagerly on every rerun
+    # scans every episode's related rows and made the page unusable over Turso.
+    if st.session_state.get("_export_csv") is not None:
+        export_action.download_button(
+            "⬇ Download CSV",
+            data=st.session_state["_export_csv"],
+            file_name=f"WLHL_Episode_Database_{date.today().isoformat()}.csv",
+            mime="text/csv",
+            use_container_width=True,
+            on_click=lambda: st.session_state.pop("_export_csv", None),
+        )
+    elif export_action.button("⬇ Export Database", use_container_width=True):
+        with st.spinner("Preparing export…"):
+            st.session_state["_export_csv"] = export_database_csv()
+        st.rerun()
     st.caption("Browse every episode or search by a topic, framework, idea, or natural-language question.")
     all_query = st.text_input("Search all episodes", placeholder='Try: "videos where I talked about the Common Sense Diet"', label_visibility="collapsed")
     if all_query.strip():
