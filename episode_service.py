@@ -53,6 +53,10 @@ def load_enrichment(connection, episode_id: int) -> dict:
 
 
 def _refresh_legacy_episode_search(connection, episode_id: int) -> None:
+    if not connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='episode_search'"
+    ).fetchone():
+        return
     row = connection.execute("SELECT * FROM episodes WHERE id=?", (episode_id,)).fetchone()
     connection.execute("DELETE FROM episode_search WHERE episode_db_id=?", (episode_id,))
     if not row:
@@ -92,6 +96,10 @@ def _refresh_legacy_episode_search(connection, episode_id: int) -> None:
 
 
 def _refresh_enrichment_search(connection, episode_id: int) -> None:
+    if not connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='enrichment_search'"
+    ).fetchone():
+        return
     row = connection.execute(
         "SELECT e.id,e.episode_title,e.transcript,x.* FROM episodes e "
         "JOIN episode_enrichment x ON x.episode_id=e.id WHERE e.id=?",
@@ -280,8 +288,10 @@ def delete_episode(connection, episode_id: int) -> str:
             "episode_topics", "episode_enrichment",
         ]:
             connection.execute(f"DELETE FROM {table} WHERE episode_id=?", (episode_id,))
-        connection.execute("DELETE FROM episode_search WHERE episode_db_id=?", (episode_id,))
-        connection.execute("DELETE FROM enrichment_search WHERE episode_db_id=?", (episode_id,))
+        if connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='episode_search'").fetchone():
+            connection.execute("DELETE FROM episode_search WHERE episode_db_id=?", (episode_id,))
+        if connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='enrichment_search'").fetchone():
+            connection.execute("DELETE FROM enrichment_search WHERE episode_db_id=?", (episode_id,))
         connection.execute("DELETE FROM episodes WHERE id=?", (episode_id,))
         refresh_unified_search_episode(connection, episode_id, commit=False)
         return label

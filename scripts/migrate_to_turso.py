@@ -8,6 +8,7 @@ It intentionally does not print credentials or transcript contents.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import sqlite3
@@ -19,6 +20,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MAX_STATEMENTS = 75
 MAX_PAYLOAD_BYTES = 750_000
+DERIVED_SEARCH_TABLES = {
+    "episode_search",
+    "enrichment_search",
+    "unified_episode_search",
+    "unified_search_documents",
+    "unified_search_meta",
+}
 
 
 def load_dotenv(path: Path) -> None:
@@ -38,6 +46,26 @@ def pipeline_url(database_url: str) -> str:
     return "https://" + database_url.removeprefix("libsql://").rstrip("/") + "/v2/pipeline"
 
 
+def encode_arg(value) -> dict:
+    """Encode a Python value as a Hrana (Turso HTTP pipeline) typed value.
+
+    The pipeline endpoint rejects raw JSON scalars with a 400 error; every
+    argument must be an internally tagged ``Value`` object. Integers are sent as
+    strings (they may exceed JSON's safe range) and blobs as base64.
+    """
+    if value is None:
+        return {"type": "null"}
+    if isinstance(value, bool):
+        return {"type": "integer", "value": str(int(value))}
+    if isinstance(value, int):
+        return {"type": "integer", "value": str(value)}
+    if isinstance(value, float):
+        return {"type": "float", "value": value}
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return {"type": "blob", "base64": base64.b64encode(bytes(value)).decode("ascii")}
+    return {"type": "text", "value": str(value)}
+
+
 def request(endpoint: str, token: str, requests: list[dict]) -> list[dict]:
     payload = json.dumps({"requests": requests}, separators=(",", ":")).encode()
     req = urllib.request.Request(
@@ -49,6 +77,9 @@ def request(endpoint: str, token: str, requests: list[dict]) -> list[dict]:
     try:
         with urllib.request.urlopen(req, timeout=60) as response:
             result = json.load(response)
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace").strip()
+        raise RuntimeError(f"Turso rejected the request ({exc.code}): {detail or exc.reason}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"Could not reach Turso: {exc.reason}") from exc
     for item in result.get("results", []):
@@ -58,7 +89,15 @@ def request(endpoint: str, token: str, requests: list[dict]) -> list[dict]:
 
 
 def execute_batch(endpoint: str, token: str, statements: list[tuple[str, list]]) -> None:
-    requests = [{"type": "execute", "stmt": {"sql": sql, "args": args}} for sql, args in statements]
+    # Each pipeline request is an independent session, so a PRAGMA set in an
+    # earlier request does not carry over. Disable foreign keys at the start of
+    # every batch: data batches insert tables in name order (children before
+    # parents), which would otherwise trip FOREIGN KEY constraints.
+    requests = [{"type": "execute", "stmt": {"sql": "PRAGMA foreign_keys=OFF", "args": []}}]
+    requests.extend(
+        {"type": "execute", "stmt": {"sql": sql, "args": [encode_arg(value) for value in args]}}
+        for sql, args in statements
+    )
     request(endpoint, token, [*requests, {"type": "close"}])
 
 
@@ -86,16 +125,21 @@ def chunks(statements: list[tuple[str, list]]):
 
 def migration_statements(db: sqlite3.Connection) -> tuple[list[tuple[str, list]], list[tuple[str, list]]]:
     objects = db.execute("""
-        SELECT type, name, sql FROM sqlite_master
+        SELECT type, name, tbl_name, sql FROM sqlite_master
         WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'
         ORDER BY CASE type WHEN 'table' THEN 1 WHEN 'index' THEN 2 WHEN 'trigger' THEN 3 ELSE 4 END, name
     """).fetchall()
     shadow_tables = {row[1] for row in db.execute("PRAGMA table_list") if row[2] == "shadow"}
-    primary = [(kind, name, sql) for kind, name, sql in objects if name not in shadow_tables]
+    excluded = shadow_tables | DERIVED_SEARCH_TABLES
+    primary = [
+        (kind, name, table, sql)
+        for kind, name, table, sql in objects
+        if name not in excluded and table not in excluded
+    ]
     ddl = [("PRAGMA foreign_keys=OFF", [])]
-    ddl.extend((sql, []) for kind, _name, sql in primary if kind == "table")
+    ddl.extend((sql, []) for kind, _name, _table, sql in primary if kind == "table")
     data: list[tuple[str, list]] = []
-    for kind, table, _sql in primary:
+    for kind, table, _owner, _sql in primary:
         if kind != "table":
             continue
         columns = visible_columns(db, table)
@@ -106,7 +150,7 @@ def migration_statements(db: sqlite3.Connection) -> tuple[list[tuple[str, list]]
         insert_sql = f"INSERT INTO {qident(table)} ({names}) VALUES ({placeholders})"
         for row in db.execute(f"SELECT {names} FROM {qident(table)}"):
             data.append((insert_sql, list(row)))
-    ddl.extend((sql, []) for kind, _name, sql in primary if kind in {"index", "trigger"})
+    ddl.extend((sql, []) for kind, _name, _table, sql in primary if kind in {"index", "trigger"})
     ddl.append(("PRAGMA foreign_keys=ON", []))
     return ddl, data
 

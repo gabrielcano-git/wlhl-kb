@@ -84,9 +84,6 @@ def test_connection_adapter_named_rows_commit_rollback_and_close():
             rows, self.rows = self.rows, []
             return rows
 
-        def __iter__(self):
-            return iter(self.rows)
-
     class RawConnection:
         def __init__(self):
             self.calls = []
@@ -108,6 +105,28 @@ def test_connection_adapter_named_rows_commit_rollback_and_close():
     assert dict(row) == {"episode_id": "EP-001", "episode_title": "First"}
     connection.commit(); connection.rollback(); connection.close()
     assert raw.calls[-3:] == ["commit", "rollback", "close"]
+
+
+def test_connection_adapter_iterates_a_non_iterable_libsql_cursor():
+    class NativeCursor:
+        description = (("name", None),)
+
+        def __init__(self):
+            self.rows = [("episodes",), ("quotes",)]
+
+        def fetchone(self):
+            return self.rows.pop(0) if self.rows else None
+
+        def fetchall(self):
+            rows, self.rows = self.rows, []
+            return rows
+
+    class NativeConnection:
+        def execute(self, _sql):
+            return NativeCursor()
+
+    rows = list(ConnectionAdapter(NativeConnection()).execute("PRAGMA table_list"))
+    assert [row["name"] for row in rows] == ["episodes", "quotes"]
 
 
 def test_connect_import_error_is_controlled(monkeypatch):

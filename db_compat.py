@@ -4,21 +4,35 @@ from __future__ import annotations
 import sqlite3
 
 
+def iter_statements(script: str):
+    """Yield individual SQL statements from a multi-statement script.
+
+    Splitting on ``;`` boundaries and confirming each candidate with
+    :func:`sqlite3.complete_statement` keeps quoted semicolons intact and,
+    unlike line-based splitting, separates statements that share one line so
+    each is executed on its own (sqlite3 and remote libsql both reject a
+    multi-statement ``execute``).
+    """
+    buffer = ""
+    for chunk in script.split(";"):
+        buffer += chunk + ";"
+        if sqlite3.complete_statement(buffer):
+            sql = buffer.strip()
+            if sql and sql != ";":
+                yield sql
+            buffer = ""
+    tail = buffer.strip().rstrip(";").strip()
+    if tail:
+        yield tail
+
+
 def execute_script(connection, script: str) -> None:
     """Execute a SQL script even when a DB-API connection lacks executescript."""
     method = getattr(connection, "executescript", None)
     if callable(method):
         method(script)
         return
-    statement = ""
-    for line in script.splitlines(keepends=True):
-        statement += line
-        if sqlite3.complete_statement(statement):
-            sql = statement.strip()
-            if sql:
-                connection.execute(sql)
-            statement = ""
-    if statement.strip():
+    for statement in iter_statements(script):
         connection.execute(statement)
 
 

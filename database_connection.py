@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import importlib
 import os
-import sqlite3
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
+
+from db_compat import iter_statements
 
 
 ROOT = Path(__file__).resolve().parent
@@ -26,8 +27,6 @@ REQUIRED_TABLES = {
     "email_ideas",
     "short_hooks",
     "processing_issues",
-    "episode_search",
-    "enrichment_search",
 }
 
 
@@ -106,7 +105,10 @@ class CursorAdapter:
         return [self._row(row) for row in self._cursor.fetchall()]
 
     def __iter__(self):
-        for row in self._cursor:
+        # libsql's native Cursor is not iterable. Its remote implementation is
+        # also more consistent when a result set is consumed with fetchall()
+        # than through repeated fetchone() calls.
+        for row in self._cursor.fetchall():
             yield self._row(row)
 
     def __getattr__(self, name):
@@ -131,15 +133,7 @@ class ConnectionAdapter:
         # Remote libsql versions may expose executescript while rejecting
         # multi-statement requests. Execute complete statements one by one so
         # the same code works locally and through Turso's remote protocol.
-        statement = ""
-        for line in script.splitlines(keepends=True):
-            statement += line
-            if sqlite3.complete_statement(statement):
-                sql = statement.strip()
-                if sql:
-                    self.execute(sql)
-                statement = ""
-        if statement.strip():
+        for statement in iter_statements(script):
             self.execute(statement)
 
     def commit(self):
