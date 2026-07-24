@@ -38,13 +38,14 @@ def test_missing_streamlit_secrets_file_is_rejected_cleanly():
         configured_credentials(environment={}, secrets=MissingSecrets())
 
 
-def test_streamlit_cloud_secret_format_supports_database_and_auth(tmp_path):
+def test_secret_format_supports_database_path_and_auth_together(tmp_path):
+    database = tmp_path / "wlhl.sqlite"
+    database.write_bytes(b"")
     secrets = {
-        "TURSO_DATABASE_URL": "libsql://cloud",
-        "TURSO_AUTH_TOKEN": "token",
+        "WLHL_SQLITE_PATH": str(database),
         "auth": {"username": "user", "password": "pass"},
     }
     from database_connection import get_config
 
-    assert get_config(environment={}, secrets=secrets, dotenv_path=tmp_path / "missing").database_url == "libsql://cloud"
+    assert get_config(environment={}, secrets=secrets, dotenv_path=tmp_path / "missing").database_path == str(database)
     assert configured_credentials(environment={}, secrets=secrets) == ("user", "pass")

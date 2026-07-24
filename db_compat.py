@@ -1,4 +1,4 @@
-"""Small compatibility helpers shared by sqlite3 and the libsql DB-API driver."""
+"""Small compatibility helpers for the sqlite3 DB-API driver."""
 from __future__ import annotations
 
 import sqlite3

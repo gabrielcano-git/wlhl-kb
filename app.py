@@ -17,7 +17,7 @@ from database_connection import (
     DatabaseConfigurationError,
     DatabaseConnectionError,
     DatabaseSchemaError,
-    connect as connect_to_turso,
+    connect,
     validate_schema,
 )
 from episode_service import (
@@ -80,13 +80,13 @@ def require_authentication() -> None:
 require_authentication()
 
 def db():
-    """Reuse one Turso connection within, and only within, this user session."""
-    if "_turso_connection" not in st.session_state:
-        connection = connect_to_turso()
+    """Reuse one database connection within, and only within, this user session."""
+    if "_db_connection" not in st.session_state:
+        connection = connect()
         validate_schema(connection)
         ensure_unified_search_index(connection)
-        st.session_state._turso_connection = connection
-    return st.session_state._turso_connection
+        st.session_state._db_connection = connection
+    return st.session_state._db_connection
 
 
 try:
@@ -95,7 +95,7 @@ except (DatabaseConfigurationError, DatabaseConnectionError, DatabaseSchemaError
     st.error(str(error))
     st.stop()
 except Exception:
-    st.error("The Turso database connected, but the WLHL search index could not be initialized.")
+    st.error("The database connected, but the WLHL search index could not be initialized.")
     st.stop()
 
 def scalar(sql, params=()):
@@ -123,8 +123,8 @@ def export_database_csv():
         "Memorable Quotes", "Email Ideas", "Short Hooks", "Transcript",
     ]
     # Bulk-fetch related rows once instead of issuing four queries per episode.
-    # Over the remote Turso connection the per-episode form made ~500 round
-    # trips and blocked the page for minutes; grouping keeps it to a handful.
+    # The per-episode form otherwise made ~500 queries and blocked the page;
+    # grouping keeps it to a handful.
     enrichment_by_id: dict = {}
     for row in connection.execute("SELECT * FROM episode_enrichment"):
         data = dict(row)
@@ -211,7 +211,7 @@ def stop_local_app():
 
 def log_out():
     st.session_state.pop("authenticated", None)
-    connection = st.session_state.pop("_turso_connection", None)
+    connection = st.session_state.pop("_db_connection", None)
     if connection is not None:
         try:
             connection.close()
@@ -251,7 +251,7 @@ def result_card(row, key_prefix="result"):
 def render_edit_content(episode_db_id):
     c=db()
     with st.expander("✏️ Edit Content — Quotes, Email Ideas & Short Hooks"):
-        st.caption("Changes are saved to the Turso WLHL database and search indexes are refreshed together.")
+        st.caption("Changes are saved to the WLHL database and search indexes are refreshed together.")
         quote_tab,email_tab,hook_tab=st.tabs(["Memorable Quotes","Email Ideas","Short Hooks"])
         with quote_tab:
             for item in c.execute("SELECT * FROM quotes WHERE episode_id=? ORDER BY id",(episode_db_id,)).fetchall():
@@ -475,7 +475,7 @@ page = st.sidebar.radio(
     key="navigation",
     on_change=close_open_episode,
 )
-st.sidebar.caption("Episode data is stored securely in Turso.")
+st.sidebar.caption("Episode data is stored in the local WLHL database.")
 st.sidebar.divider()
 if st.sidebar.button("Log out", use_container_width=True):
     log_out()
@@ -530,7 +530,7 @@ elif page == "Search":
 elif page == "All Episodes":
     heading,add_action,export_action=st.columns([4,1.5,1.7]);heading.subheader("All Episodes");add_action.button("＋ Add New Episode",on_click=go_to_add_episode,use_container_width=True,type="primary")
     # Build the CSV only when requested. Generating it eagerly on every rerun
-    # scans every episode's related rows and made the page unusable over Turso.
+    # scans every episode's related rows and made the page slow.
     if st.session_state.get("_export_csv") is not None:
         export_action.download_button(
             "⬇ Download CSV",
