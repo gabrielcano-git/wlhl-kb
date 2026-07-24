@@ -8,4 +8,8 @@ __pycache__/
 database/backups/
 *.log
 *.sqlite
+*.sqlite-wal
+*.sqlite-shm
+# Keep the seed database in the image; the entrypoint copies it to the volume.
+!database-init.sqlite
 tests/

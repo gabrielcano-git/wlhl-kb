@@ -4,23 +4,23 @@ The WLHL Knowledge Base is a password-protected Streamlit application for search
 
 ## Runtime data model
 
-Turso is the only runtime data source. Every application read and write—including episodes, search indexes, Prompt Workspace settings, presets, and prompt history—uses the configured remote database.
+A local SQLite database file is the only runtime data source. Every application read and write—including episodes, search indexes, Prompt Workspace settings, presets, and prompt history—uses that file. Reads are local-disk fast, with no network round-trips.
 
-`database.sqlite`, `database-init.sqlite`, and other SQLite snapshots are not opened by the application. They may be retained as development fixtures, exports, or explicit migration sources. The configured Turso database already contains the production episodes; do not run the migration utility against it merely to start the app.
+The database path is resolved from `WLHL_SQLITE_PATH` (environment, Streamlit secrets, or `.env`) and defaults to the bundled `database-init.sqlite` seed. In Docker it defaults to `/data/wlhl.sqlite` on a persistent volume, seeded from `database-init.sqlite` on first boot; existing data is never overwritten.
 
-The app creates one Turso DB-API connection per Streamlit user session, reuses it across that session's reruns, validates the required WLHL schema before initializing search, and closes it on logout. CRUD operations update source and derived search tables in one transaction and roll back together on failure.
+The app opens one connection per Streamlit user session in WAL mode (concurrent readers never block; competing writers wait up to `busy_timeout` for the lock), reuses it across that session's reruns, validates the required WLHL schema before initializing search, and closes it on logout. CRUD operations update source and derived search tables in one transaction and roll back together on failure.
 
 ## Local Docker
 
-Docker Desktop is the supported local runtime. Copy the environment template and set all four required values:
+Docker Desktop is the supported local runtime. Copy the environment template and set the login credentials:
 
 ```bash
 cp .env.example .env
 ```
 
 ```dotenv
-TURSO_DATABASE_URL=libsql://your-database-your-org.turso.io
-TURSO_AUTH_TOKEN=your-token
+# Optional: leave blank to use the /data/wlhl.sqlite volume default.
+WLHL_SQLITE_PATH=
 WLHL_AUTH_USERNAME=your-local-login
 WLHL_AUTH_PASSWORD=use-a-strong-password
 ```
@@ -31,7 +31,7 @@ Start the application:
 docker compose up --build
 ```
 
-Open <http://localhost:8501>. Compose runs the Python 3.12 image as `linux/amd64`, which lets ARM64 Docker Desktop use the official `libsql==0.1.11` wheel through emulation. The project bind mount supports local code iteration, but the app never uses a mounted SQLite file for runtime data.
+Open <http://localhost:8501>. Runtime data lives on the named `wlhl-data` volume mounted at `/data`, so it survives rebuilds and `docker compose down`. The project bind mount supports local code iteration.
 
 Check container health with:
 
@@ -39,33 +39,32 @@ Check container health with:
 curl --fail http://localhost:8501/_stcore/health
 ```
 
-The sidebar's **Stop App** control is shown only in this local Docker runtime. `docker compose down` removes the stopped container.
+The sidebar's **Stop App** control is shown only in this local Docker runtime.
 
-## Streamlit Community Cloud
+## Deploying to a DigitalOcean droplet
 
-Deploy `app.py` with `requirements.txt`, then add these values to **Settings → Secrets**:
+The app is lightweight (Streamlit + stdlib `sqlite3`); a 1–2 GB droplet is plenty for an internal tool with a handful of users.
 
-```toml
-TURSO_DATABASE_URL = "libsql://your-database-your-org.turso.io"
-TURSO_AUTH_TOKEN = "your-token"
+1. Create the droplet and install Docker + the Compose plugin.
+2. `git clone` this repository onto the droplet.
+3. Create `.env` with strong `WLHL_AUTH_USERNAME` / `WLHL_AUTH_PASSWORD`. Leave `WLHL_SQLITE_PATH` blank to use the `/data` volume default.
+4. Start it: `docker compose up -d --build`. `restart: unless-stopped` brings it back after reboots.
+5. Put a reverse proxy (Caddy or nginx) in front for TLS and a domain, forwarding to `:8501` **with WebSocket upgrade enabled** (Streamlit needs it).
 
-[auth]
-username = "your-login"
-password = "use-a-strong-password"
-```
+The database lives on the `wlhl-data` Docker volume. Back it up with `docker run --rm -v wlhl-data:/data -v "$PWD":/backup alpine cp /data/wlhl.sqlite /backup/`, or snapshot the droplet.
 
-Database secrets are top-level keys; login credentials belong under `[auth]`. Environment variables take precedence when both forms exist. Never commit `.env` or `.streamlit/secrets.toml`.
+> Streamlit Community Cloud is **not** suitable for this runtime: its filesystem is ephemeral, so local SQLite writes would be lost on restart. Use a droplet (or any host with a persistent disk).
 
-If configuration is absent, credentials are rejected, Turso is unreachable, or required tables are missing, startup stops with a safe message that does not reveal the database URL or token.
+Never commit `.env` or `.streamlit/secrets.toml`. If the database file is missing, credentials are rejected, or required tables are absent, startup stops with a safe message.
 
 ## Features
 
-- **All Episodes** browses and exports the remote episode catalog.
+- **All Episodes** browses and exports the episode catalog.
 - **Search** ranks matches across titles, categories, questions, summaries, frameworks, semantic metadata, related content, and transcripts. FTS5 improves ranking when available; portable document search remains available without it.
 - **Topics** and **Call-In Episodes** provide focused browsing.
-- **Add Episode** and episode editors update Turso and all search indexes transactionally.
+- **Add Episode** and episode editors update the database and all search indexes transactionally.
 - **Prompt Workspace** selects episode material and builds a prompt for use in ChatGPT, Claude, Gemini, or another model. The app assembles the prompt but does not call an AI API.
-- **Writing Settings**, presets, and the latest 50 prompts are persisted in Turso.
+- **Writing Settings**, presets, and the latest 50 prompts are persisted in the database.
 
 ## Development and tests
 
@@ -78,38 +77,19 @@ python -m compileall -q app.py authentication.py database_connection.py db_compa
 docker compose config
 ```
 
-Unit and integration tests write only to temporary SQLite copies. The real Turso check is opt-in and read-only:
+Unit and integration tests write only to temporary SQLite copies.
 
-```bash
-RUN_TURSO_TEST=1 pytest -m turso tests/test_turso_readonly.py
-```
+## Legacy migration utility
 
-It validates the schema, confirms `episodes = 127`, and reads one episode. It performs no insert, update, delete, DDL, or index rebuild.
-
-## Explicit migration utility
-
-Migration is a separate administrative operation, not part of startup. It requires an explicit source path, validates that `episodes` exists, refuses a zero-episode source, and filters FTS shadow tables.
-
-Always inspect locally first; dry-run does not require Turso credentials:
-
-```bash
-python scripts/migrate_to_turso.py --source /absolute/path/to/source.sqlite --dry-run
-```
-
-Only for an intentionally empty destination, set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`, confirm the target independently, then omit `--dry-run`:
-
-```bash
-python scripts/migrate_to_turso.py --source /absolute/path/to/source.sqlite
-```
-
-The migration does not modify its source. Do not run it against the already populated production Turso database.
+`scripts/migrate_to_turso.py` is a standalone, one-way export from a local SQLite database to a Turso remote. It is not used by the app and is retained only for historical migrations. It requires an explicit source path, validates that `episodes` exists, refuses a zero-episode source, filters FTS shadow tables, and does not modify its source.
 
 ## Project layout
 
 - `app.py` — Streamlit interface and session lifecycle
-- `database_connection.py` — Turso configuration, connection, safe errors, and schema validation
+- `database_connection.py` — SQLite configuration, connection, safe errors, and schema validation
+- `docker-entrypoint.sh` — seeds the runtime database on first boot, then starts Streamlit
 - `episode_service.py` — transactional episode and related-content operations
 - `unified_search.py` — portable cross-table index and optional FTS5 ranking
 - `prompt_workspace.py` / `prompt_workspace_ui.py` — prompt persistence, assembly, and interface
-- `scripts/migrate_to_turso.py` — explicit one-way migration utility
-- `tests/` — isolated tests plus an opt-in read-only Turso check
+- `scripts/migrate_to_turso.py` — legacy one-way export utility (not used at runtime)
+- `tests/` — isolated tests against temporary SQLite copies

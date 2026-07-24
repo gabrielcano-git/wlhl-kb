@@ -1,12 +1,13 @@
-"""Turso configuration and DB-API connection helpers.
+"""SQLite configuration and DB-API connection helpers.
 
-The application is remote-only at runtime.  Local SQLite files are fixtures and
-migration sources; :func:`connect` never opens them.
+The application runs against a local SQLite database file at runtime.  The path
+is resolved from ``WLHL_SQLITE_PATH`` (environment, Streamlit secrets, or
+``.env``) and defaults to the bundled ``database-init.sqlite`` seed.
 """
 from __future__ import annotations
 
-import importlib
 import os
+import sqlite3
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,7 +32,7 @@ REQUIRED_TABLES = {
 
 
 class DatabaseConfigurationError(RuntimeError):
-    """Raised when Turso settings are absent or malformed."""
+    """Raised when the SQLite database path is absent or does not exist."""
 
 
 class DatabaseConnectionError(RuntimeError):
@@ -43,9 +44,8 @@ class DatabaseSchemaError(RuntimeError):
 
 
 @dataclass(frozen=True)
-class TursoConfig:
-    database_url: str
-    auth_token: str
+class SqliteConfig:
+    database_path: str
 
 
 class NamedRow(Sequence):
@@ -116,7 +116,7 @@ class CursorAdapter:
 
 
 class ConnectionAdapter:
-    """DB-API facade used for both remote libsql and driver test doubles."""
+    """DB-API facade over sqlite3, kept driver-neutral for test doubles."""
 
     def __init__(self, connection):
         self.raw_connection = connection
@@ -189,56 +189,46 @@ def get_config(
     environment: Mapping[str, str] | None = None,
     secrets: Mapping[str, Any] | None = None,
     dotenv_path: Path | None = None,
-) -> TursoConfig:
+) -> SqliteConfig:
     environment = os.environ if environment is None else environment
     secrets = _streamlit_secrets() if secrets is None else secrets
     dotenv = read_dotenv(ROOT / ".env" if dotenv_path is None else dotenv_path)
-    database_url = _value("TURSO_DATABASE_URL", environment, secrets, dotenv)
-    auth_token = _value("TURSO_AUTH_TOKEN", environment, secrets, dotenv)
-    missing = [
-        name
-        for name, value in (("TURSO_DATABASE_URL", database_url), ("TURSO_AUTH_TOKEN", auth_token))
-        if not value
-    ]
-    if missing:
+    raw_path = _value("WLHL_SQLITE_PATH", environment, secrets, dotenv)
+    path = Path(raw_path).expanduser() if raw_path else ROOT / "database-init.sqlite"
+    if not path.is_file():
         raise DatabaseConfigurationError(
-            "Turso is not configured. Set " + " and ".join(missing) + " in the environment, .env, or Streamlit Secrets."
+            f"SQLite database not found at {path}. Set WLHL_SQLITE_PATH to an existing WLHL database file."
         )
-    if not database_url.startswith(("libsql://", "https://")):
-        raise DatabaseConfigurationError("TURSO_DATABASE_URL must be a libsql:// or HTTPS Turso URL.")
-    return TursoConfig(database_url=database_url, auth_token=auth_token)
+    return SqliteConfig(database_path=str(path))
 
 
 def safe_connection_message(error: BaseException) -> str:
-    """Classify driver errors without echoing their credential-bearing text."""
+    """Classify driver errors into safe, user-facing connection messages."""
     text = str(error).lower()
-    if any(marker in text for marker in ("401", "403", "auth", "token", "unauthorized", "forbidden")):
-        return "Turso rejected the database credentials. Check the configured URL and auth token."
-    if any(
-        marker in text
-        for marker in (
-            "timeout", "timed out", "network", "dns", "resolve", "unavailable", "socket",
-            "connection refused", "failed to connect", "error sending request", "transport error",
-        )
-    ):
-        return "Turso is temporarily unreachable. Check the network connection and try again."
-    return "The Turso database connection failed. Check the deployment configuration and try again."
+    if any(marker in text for marker in ("no such file", "unable to open", "cannot open", "not found")):
+        return "The SQLite database file could not be opened. Check WLHL_SQLITE_PATH."
+    if "permission" in text or "readonly" in text or "read-only" in text:
+        return "The SQLite database file is not accessible. Check its file permissions."
+    if "locked" in text or "busy" in text:
+        return "The SQLite database is busy. Try again in a moment."
+    if any(marker in text for marker in ("malformed", "not a database", "corrupt", "file is encrypted")):
+        return "The SQLite database file is not a valid WLHL database."
+    return "The SQLite database connection failed. Check the deployment configuration and try again."
 
 
-def connect(config: TursoConfig | None = None):
-    """Open a DB-API-compatible Turso connection.
+def connect(config: SqliteConfig | None = None):
+    """Open a DB-API-compatible connection to the local SQLite database.
 
-    The URL and token are deliberately never included in raised errors.
+    WAL journaling keeps concurrent readers from blocking, and ``busy_timeout``
+    makes competing writers wait for the lock instead of raising immediately.
     """
     config = config or get_config()
     try:
-        libsql = importlib.import_module("libsql")
-    except ImportError as exc:
-        raise DatabaseConfigurationError(
-            "The Turso driver is unavailable. Install dependencies from requirements.txt."
-        ) from exc
-    try:
-        connection = libsql.connect(database=config.database_url, auth_token=config.auth_token)
+        connection = sqlite3.connect(config.database_path, check_same_thread=False)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA journal_mode=WAL")
+        connection.execute("PRAGMA busy_timeout=5000")
+        connection.execute("PRAGMA foreign_keys=ON")
         return ConnectionAdapter(connection)
     except Exception as exc:
         raise DatabaseConnectionError(safe_connection_message(exc)) from exc
@@ -253,7 +243,7 @@ def validate_schema(connection, required_tables: set[str] | None = None) -> int:
         missing = sorted(required - existing)
         if missing:
             raise DatabaseSchemaError(
-                "The configured Turso database is missing required WLHL tables: " + ", ".join(missing) + "."
+                "The configured database is missing required WLHL tables: " + ", ".join(missing) + "."
             )
         return int(connection.execute("SELECT COUNT(*) FROM episodes").fetchone()[0])
     except DatabaseSchemaError:
